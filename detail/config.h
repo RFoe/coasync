@@ -21,6 +21,9 @@
 #if __has_include(<version>)
 #  include <version>
 #else
+/// This header was originally in the C standard library as <iso646.h>.
+/// Compatibility header, in C defines alternative operator representations which are keywords in C++.
+/// This means that in a conforming implementation, including this header has no effect.
 #  include <ciso646> // For stdlib feature-test macros when <version> is not available
 #endif
 
