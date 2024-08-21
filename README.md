@@ -8,7 +8,7 @@
     <br />
     <br />
     <br />
-    <a href="https://github.com/RFoe/coasync/tree/master/test">View Demo</a>
+    <a href="https://github.com/RFoe/coasync/tree/master/demo">View Demo</a>
     ·
     <a href="https://github.com/RFoe/coasync/issues/new?labels=bug&template=bug-report---.md">Report Bug</a>
     ·
@@ -266,7 +266,7 @@ int main() {
 ```
 
 
-### For more examples, please refer to the test set in project directory[coasync/test]. 
+### For more examples, please refer to the demo set in project directory[coasync/demo]. 
 ### There are many code demos that cover all the current features of the project
 
 
