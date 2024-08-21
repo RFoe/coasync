@@ -49,9 +49,10 @@
 <!-- ABOUT THE PROJECT -->
 ## About The Project
 
-Coasync is a cross-platform C++ library for network and low-level I/O programming that provides developers with a consistent asynchronous model using a modern C++ 20 approach.
-
-`RFoer`, `coasync`, `wangxlang3@mail2.sysu.edu.com`, `C++/coasync`
+	Coasync is a cross-platform C++ library for network and low-level I/O programming that provides developers with a consistent asynchronous model using a modern C++ 20 approach.
+	Coasync provides an efficient and flexible way to handle network communications, file I/O, and other asynchronous tasks, making it easy for developers to build high-performance, scalable network applications. 	
+ 	Coasync can handle a large number of I/O operations without blocking the main thread. It supports multiple operating systems, including Windows and Linux, and provides a consistent API to ensure cross-platform compatibility of code. It can be easily integrated into existing projects to support common network protocols such as TCP and UDP.
+`Username: RFoer`, `Project-name: coasync`, `Email: wangxlang3@mail2.sysu.edu.com`
 
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
