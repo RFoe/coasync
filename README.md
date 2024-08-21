@@ -129,8 +129,9 @@ int main()
   co_spawn(context, test(), use_detach);
   context.loop();
 }
-``` 
-providing both a client and server implementation for rpc. using tcp protocol under the hood
+```
+rpc allows a client to invoke an object that exists on a remote computer as if it were an object in a local application, without knowing the details of the call.
+Coasync providing both a client and server implementation for rpc. It does not matter to the caller how the received parameters are used inside the callable object on the server side and how the result is calculated. And for a remote call, these parameters are passed to another computer on the network in some form of information that the caller does not care about as well.
 #### rpc_client
 
 ``` cpp
@@ -187,6 +188,7 @@ int main() {
 
 ```
 #### channel
+The channel can be used to send messages between different parts of the same application. The set of messages and the capacity of messages supported by a channel is specified by its template parameters. Messages can be sent and received using asynchronous and non-blocking operations in C++20 coroutine syntax. 
 
 ``` cpp
 #include "../include/coasync/execution_context.hpp"
@@ -219,6 +221,7 @@ int main() {
 
 ```
 #### serialize/deserialize
+When you want to save the state of an object in memory to a file or database, or want to use a socket to transfer an object over the network, you need to convert an object to a sequence of bytes, and the process of restoring a sequence of bytes to an object is called an object, this process is called serialization/deserialization.
 
 ``` cpp
 #include "../include/coasync/execution_context.hpp"
