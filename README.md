@@ -1,4 +1,5 @@
-[![badge](https://img.shields.io/badge/license-MIT-blue)](https://github.com/RFoe/coasync/master/LICENSE.MIT)
+[![Build Status](https://ci.appveyor.com/api/projects/status/1acb366xfyg3qybk/branch/develop?svg=true)]
+[![badge](https://img.shields.io/badge/license-MIT-blue)](https://github.com/RFoe/coasync/blob/master/LISCENCE.MIT)
 <!-- Improved compatibility of back to top link: See: https://github.com/RFoe/coasync -->
 <a id="readme-top"></a>
 
