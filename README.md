@@ -68,11 +68,16 @@ header only, does not rely on any third party library, does not need to compile 
 * **Winsock:** If the project is built on the windows platform, you need to dynamically link the winsock2 network library
 * compile command
   ```sh
+  ##Gnuc/clang
   -std=c++20
+  ##MSVC
+  /std:c++20
   ```
 * linkage command
   ```sh
   -lws2_32
+  ##VS
+  #pragma comment(lib, "Ws2_32.lib")
   ```
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
@@ -82,7 +87,9 @@ header only, does not rely on any third party library, does not need to compile 
 <!-- USAGE EXAMPLES -->
 ## Usage
 
-#### when_any/when_any algorithm
+### when_any/when_any algorithm
+ ** when_all is a awaitable generator that returns a awaitable that completes when the last of the input awaitables completes. It sends a pack of values, where the elements of said pack are the values sent by the input awaitables, in order.
+ ** when_any is a awaitable generator that returns a awaitable that completes when the first of the input awaitables completes[or throws]. It sends a variant of values, where the element of that are the value sent by the first awaitable. Coasync supports for cancelling an operation, by send stop_request using std::stop_token/std::stop_source
 ``` cpp
 
 #include "../include/coasync/when_all.hpp"
@@ -124,7 +131,7 @@ int main()
   context.loop();
 }
 ``` 
-
+providing both a client and server implementation for rpc. using tcp protocol under the hood
 #### rpc_client
 
 ``` cpp
@@ -258,7 +265,8 @@ int main() {
 ```
 
 
-### For more examples, please refer to the test set in directory[coasync/test]
+### For more examples, please refer to the test set in project directory[coasync/test]. 
+### There are many code demos that cover all the current features of the project
 
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
@@ -268,10 +276,11 @@ int main() {
 <!-- ROADMAP -->
 ## Roadmap
 
-- [ ] Threading and coroutines work together
-- [ ] Many provided asynchronous algorithms
-- [ ] Asynchronous schedulers are easy to extend
-- [ ] High performance and low latency
+- [ ] Threading and coroutines work together: All nodes in the coroutine code that cede control are known, and there are no problems associated with multithreaded synchronization. On the other hand, the overhead of coroutines is very small, and tens of thousands of coroutines concurrent is perfectly fine.
+- [ ] Many provided asynchronous algorithms: When launching a asynchronous work, and it won't block the calling execution agent even if the work is not completed. and we can specify where asynchronous work is executed.And also the asynchronous algorithm is composable and can be customized
+
+- [ ] Asynchronous schedulers are easy to extend:The structure of the execution agent and scheduling server is very clear and simple, so users can easily customize new asynchronous callable objects according to the agreed rules
+- [ ] High performance and low latency: The underlying event loop and scheduling algorithm are optimized to achieve high performance and low latency concurrency and response
 
 See the [open issues](https://github.com/RFoe/coasync/issues) for a full list of proposed features (and known issues).
 
