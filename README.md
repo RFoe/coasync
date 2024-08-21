@@ -51,7 +51,7 @@
 <!-- ABOUT THE PROJECT -->
 ## About The Project
 
-    Coasync is a cross-platform C++ library for network and low-level I/O programming that provides developers with a consistent asynchronous model using a modern C++ 20 approach. Coasync provides an efficient and flexible way to handle network communications, file I/O, and other asynchronous tasks, making it easy for developers to build high performance, scalable network applications. Coasync can handle a large number of I/O operations without blocking the main thread. It supports multiple operating systems, including Windows and Linux, and provides a consistent API to ensure cross-platf-orm compatibility of code. It can be easily integrated into existing projects to support common network protocols such as TCP and UDP.
+`Coasync` is a cross-platform C++ library for network and low-level I/O programming that provides developers with a consistent asynchronous model using a modern C++ 20 approach. `Coasync` provides an efficient and flexible way to handle network communications, file I/O, and other asynchronous tasks, making it easy for developers to build high performance, scalable network applications. Coasync can handle a large number of I/O operations without blocking the main thread. It supports multiple operating systems, including Windows and Linux, and provides a consistent API to ensure cross-platf-orm compatibility of code. It can be easily integrated into existing projects to support common network protocols such as TCP and UDP.
 `Username: RFoer`, `Project-name: coasync`, `Email: wangxlang3@mail2.sysu.edu.com`
 
 
@@ -61,7 +61,7 @@
 
 <!-- GETTING STARTED -->
 ## Getting Started
-Coasync has a lightweight compilation process, so its integrated compilation is very simple, just specify the path of the project, and include the required header file in the C++ source file. Header-only makes compiler optimization can do better. Because inline functions and all implementations are visible at compile time, considerable optimizations can be made, including some global optimizations. Coasync library does not rely on any third party library, and does not need to compile separately. Just add the include/coasync path in the Include directory of the project, and in the source code #include <coasync/...>, then we can get started.
+`Coasync` has a lightweight compilation process, so its integrated compilation is very simple, just specify the path of the project, and include the required header file in the C++ source file. Header-only makes compiler optimization can do better. Because inline functions and all implementations are visible at compile time, considerable optimizations can be made, including some global optimizations. `Coasync` library does not rely on any third party library, and does not need to compile separately. Just add the include/coasync path in the Include directory of the project, and in the source code #include <coasync/...>, then we can get started.
 
 ### Prerequisites
 * **C++20:** Robust support for most language features in Cpp20{[ranges](https://en.cppreference.com/w/cpp/header/ranges), [concepts](https://en.cppreference.com/w/cpp/header/concepts), [coroutines](https://en.cppreference.com/w/cpp/header/coroutine), [memory_resource](https://en.cppreference.com/w/cpp/header/memory_resource)}.
@@ -88,8 +88,8 @@ Coasync has a lightweight compilation process, so its integrated compilation is 
 ## Usage
 
 ### when_any/when_any algorithm
- ** when_all is a awaitable generator that returns a awaitable that completes when the last of the input awaitables completes. It sends a pack of values, where the elements of said pack are the values sent by the input awaitables, in order.
- ** when_any is a awaitable generator that returns a awaitable that completes when the first of the input awaitables completes[or throws]. It sends a variant of values, where the element of that are the value sent by the first awaitable. Coasync supports for cancelling an operation, by send stop_request using std::stop_token/std::stop_source
+ -- `when_all` is a awaitable generator that returns a awaitable that completes when the last of the input awaitables completes. It sends a pack of values, where the elements of said pack are the values sent by the input awaitables, in order.
+ -- `when_any` is a awaitable generator that returns a awaitable that completes when the first of the input awaitables completes[or throws]. It sends a variant of values, where the element of that are the value sent by the first awaitable. Coasync supports for cancelling an operation, by send stop_request using std::stop_token/std::stop_source
 ``` cpp
 
 #include "../include/coasync/when_all.hpp"
@@ -131,8 +131,8 @@ int main()
   context.loop();
 }
 ```
-rpc allows a client to invoke an object that exists on a remote computer as if it were an object in a local application, without knowing the details of the call.
-Coasync providing both a client and server implementation for rpc. It does not matter to the caller how the received parameters are used inside the callable object on the server side and how the result is calculated. And for a remote call, these parameters are passed to another computer on the network in some form of information that the caller does not care about as well.
+`rpc` allows a client to invoke an object that exists on a remote computer as if it were an object in a local application, without knowing the details of the call.
+`Coasync` providing both a client and server implementation for rpc. It does not matter to the caller how the received parameters are used inside the callable object on the server side and how the result is calculated. And for a remote call, these parameters are passed to another computer on the network in some form of information that the caller does not care about as well.
 #### rpc_client
 
 ``` cpp
@@ -189,7 +189,7 @@ int main() {
 
 ```
 #### channel
-The channel can be used to send messages between different parts of the same application. The set of messages and the capacity of messages supported by a channel is specified by its template parameters. Messages can be sent and received using asynchronous and non-blocking operations in C++20 coroutine syntax. 
+The `channel` can be used to send messages between different parts of the same application. The set of messages and the capacity of messages supported by a channel is specified by its template parameters. Messages can be sent and received using asynchronous and non-blocking operations in C++20 coroutine syntax. 
 
 ``` cpp
 #include "../include/coasync/execution_context.hpp"
@@ -222,7 +222,7 @@ int main() {
 
 ```
 #### serialize/deserialize
-When you want to save the state of an object in memory to a file or database, or want to use a socket to transfer an object over the network, you need to convert an object to a sequence of bytes, and the process of restoring a sequence of bytes to an object is called an object, this process is called serialization/deserialization.
+When you want to save the state of an object in memory to a file or database, or want to use a socket to transfer an object over the network, you need to convert an object to a sequence of bytes, and the process of restoring a sequence of bytes to an object is called an object, this process is called `serialization/deserialization`.
 
 ``` cpp
 #include "../include/coasync/execution_context.hpp"
