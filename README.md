@@ -1,5 +1,5 @@
 ![Build Status](https://ci.appveyor.com/api/projects/status/1acb366xfyg3qybk/branch/develop?svg=true)
-[![badge](https://img.shields.io/badge/license-MIT-blue)](https://github.com/RFoe/coasync/blob/master/LISCENCE.MIT)
+[![badge](https://img.shields.io/badge/license-MIT-blue)](https://github.com/RFoe/coasync/blob/master/LISCENSE)
 <!-- Improved compatibility of back to top link: See: https://github.com/RFoe/coasync -->
 <a id="readme-top"></a>
 
@@ -51,7 +51,7 @@
 <!-- ABOUT THE PROJECT -->
 ## About The Project
 
-`Coasync` is a cross-platform C++ library for network and low-level I/O programming that provides developers with a consistent asynchronous model using a modern C++ 20 approach. `Coasync` provides an efficient and flexible way to handle network communications, file I/O, and other asynchronous tasks, making it easy for developers to build high performance, scalable network applications. Coasync can handle a large number of I/O operations without blocking the main thread. It supports multiple operating systems, including Windows and Linux, and provides a consistent API to ensure cross-platf-orm compatibility of code. It can be easily integrated into existing projects to support common network protocols such as TCP and UDP.
+`Coasync` is a **cross-platform** C++ library for **network and low-level I/O** programming that provides developers with a consistent **asynchronous model** using a modern C++ 20 approach. `Coasync` provides an efficient and flexible way to handle network communications, file I/O, and other asynchronous tasks, making it easy for developers to build high performance, scalable network applications. Coasync can handle a large number of I/O operations without blocking the main thread. It supports multiple operating systems, including Windows and Linux, and provides a consistent API to ensure cross-platf-orm compatibility of code. It can be easily integrated into existing projects to support common network protocols such as TCP and UDP.
 `Username: RFoer`, `Project-name: coasync`, `Email: wangxlang3@mail2.sysu.edu.com`
 
 
@@ -61,22 +61,22 @@
 
 <!-- GETTING STARTED -->
 ## Getting Started
-`Coasync` has a lightweight compilation process, so its integrated compilation is very simple, just specify the path of the project, and include the required header file in the C++ source file. Header-only makes compiler optimization can do better. Because inline functions and all implementations are visible at compile time, considerable optimizations can be made, including some global optimizations. `Coasync` library does not rely on any third party library, and does not need to compile separately. Just add the include/coasync path in the Include directory of the project, and in the source code #include <coasync/...>, then we can get started.
+`Coasync` has a lightweight compilation process, so its integrated compilation is very simple, just specify the path of the project, and include the required header file in the C++ source file. Header-only makes compiler optimization can do better. Because inline functions and all implementations are visible at compile time, considerable optimizations can be made, including some global optimizations. `Coasync` library **does not rely on any third party library**, and does not need to compile separately. Just add the include/coasync path in the Include directory of the project, and in the source code #include <coasync/...>, then we can get started.
 
 ### Prerequisites
 * **C++20:** Robust support for most language features in Cpp20{[ranges](https://en.cppreference.com/w/cpp/header/ranges), [concepts](https://en.cppreference.com/w/cpp/header/concepts), [coroutines](https://en.cppreference.com/w/cpp/header/coroutine), [memory_resource](https://en.cppreference.com/w/cpp/header/memory_resource)}.
 * **Winsock:** If the project is built on the windows platform, you need to dynamically link the winsock2 network library
 * compile command
   ```sh
-  ##Gnuc/clang
+  ## gnuc/clang
   -std=c++20
-  ##MSVC
+  ## MSVC
   /std:c++20
   ```
 * linkage command
   ```sh
   -lws2_32
-  ##VS
+  ## MSVS
   #pragma comment(lib, "Ws2_32.lib")
   ```
 
