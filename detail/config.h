@@ -59,8 +59,8 @@
   COASYNC_EXPAND(COASYNC_EXPAND(COASYNC_EXPAND(COASYNC_EXPAND(__VA_ARGS__))))                      \
   /**/
 #define COASYNC_PARENS ()
-/// token sequence __VA_OPT__(content??), which is replaced by content if __VA_ARGS__ is non-empty,
-/// and expands to nothing otherwise.
+/// token sequence __VA_OPT__(content??), which is replaced by content if __VA_ARGS__
+/// is non-empty, and expands to nothing otherwise.
 #define COASYNC_FOR_EACH(_MACRO, ...)                                                              \
   __VA_OPT__(COASYNC_EXPAND_R(COASYNC_FOR_EACH_HELPER(_MACRO, __VA_ARGS__)))                       \
   /**/
