@@ -173,6 +173,11 @@
 #define COASYNC_ATTR_weak     COASYNC_PROBE(~, 5)
 #define COASYNC_ATTR___weak__ COASYNC_PROBE(~, 5)
 
+/// the compiler could use the extended instruction sets even if the built-ins
+/// are not used explicitly in the program. For this reason, applications that
+/// perform run-time CPU detection must compile separate files for each supported
+/// architecture, using the appropriate flags. In particular, the file containing
+/// the CPU detection code should be compiled without these options.
 #if !COASYNC_MSVC() && defined(__has_builtin)
 #  define COASYNC_HAS_BUILTIN __has_builtin
 #else
