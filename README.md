@@ -1,3 +1,4 @@
+[![badge](https://img.shields.io/badge/license-MIT-blue)](https://github.com/RFoe/coasync/master/LICENSE.MIT)
 <!-- Improved compatibility of back to top link: See: https://github.com/RFoe/coasync -->
 <a id="readme-top"></a>
 
