@@ -63,7 +63,7 @@ Coasync is a cross-platform C++ library for network and low-level I/O programmin
 header only, does not rely on any third party library, does not need to compile separately, add the include/coasync path in the Include directory of the project, in the source code #include <coasync/...> can be used;
 
 ### Prerequisites
-* **C++20:** Robust support for most language features in Cpp20[ranges, concepts, coroutines].
+* **C++20:** Robust support for most language features in Cpp20{[ranges](https://en.cppreference.com/w/cpp/header/ranges), [concepts](https://en.cppreference.com/w/cpp/header/concepts), [coroutines](https://en.cppreference.com/w/cpp/header/coroutine), [memory_resource](https://en.cppreference.com/w/cpp/header/memory_resource)}.
 * **Winsock:** If the project is built on the windows platform, you need to dynamically link the winsock2 network library
 * compile command
   ```sh
