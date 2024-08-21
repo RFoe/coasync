@@ -1,12 +1,6 @@
 <!-- Improved compatibility of back to top link: See: https://github.com/RFoe/coasync -->
 <a id="readme-top"></a>
-<!---->
-<!-- PROJECT LOGO -->
-<br />
-<div align="center">
-  <a href="[https://github.com/RFoe/coasync](https://github.com/RFoe/coasync)">
-    
-  </a>
+
 
 <h3 align="center">coasync</h3>
 
