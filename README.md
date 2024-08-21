@@ -1,13 +1,11 @@
 <!-- Improved compatibility of back to top link: See: https://github.com/RFoe/coasync -->
 <a id="readme-top"></a>
 
-
 <h3 align="center">coasync</h3>
 
   <p align="center">
     Asynchronous network library that supports coroutines
     <br />
-    <a href="https://github.com/RFoe/coasync"><strong>Explore the docs »</strong></a>
     <br />
     <br />
     <a href="https://github.com/RFoe/coasync/tree/master/test">View Demo</a>
