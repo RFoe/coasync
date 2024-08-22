@@ -1,5 +1,8 @@
+[![C++](https://img.shields.io/badge/C++-%2300599C.svg?logo=c%2B%2B&logoColor=white)](#)
 ![Build Status](https://ci.appveyor.com/api/projects/status/1acb366xfyg3qybk/branch/develop?svg=true)
 [![badge](https://img.shields.io/badge/license-MIT-blue)](https://github.com/RFoe/coasync/blob/master/LISCENSE)
+![success](https://img.shields.io/badge/Windows-0078D6?style=for-the-badge&logo=windows&logoColor=white)
+![unknown](https://img.shields.io/badge/Linux-FCC624?style=for-the-badge&logo=linux&logoColor=black)
 <!-- Improved compatibility of back to top link: See: https://github.com/RFoe/coasync -->
 <a id="readme-top"></a>
 
