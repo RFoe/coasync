@@ -13,7 +13,7 @@
     <br />
     <br />
     <br />
-    <a href="https://github.com/RFoe/coasync/tree/master/demo">View Demo</a>
+    <a href="https://github.com/RFoe/coasync/tree/master/example">View Demo</a>
     ·
     <a href="https://github.com/RFoe/coasync/issues/new?labels=bug&template=bug-report---.md">Report Bug</a>
     ·
@@ -271,8 +271,8 @@ int main() {
 ```
 
 
-### For more examples, please refer to the demo set in project directory[coasync/demo]. 
-### There are many code demos that cover all the current features of the project
+### For more examples, please refer to the example set in project directory[coasync/example]. 
+### There are many code examples that cover all the current features of the project
 
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
