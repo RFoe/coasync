@@ -411,7 +411,9 @@ protected:
   using socket_base<execution_context>::M_context;
   protocol_type 												M_protocol;
   using socket_base<execution_context>::M_sockfd;
+#if defined(_WIN32) || defined(_WIN64)
   using socket_base<execution_context>::M_bits;
+#endif
   using socket_base<execution_context>::socket_base;
   using socket_base<execution_context>::operator=;
 };
