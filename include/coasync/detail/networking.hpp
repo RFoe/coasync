@@ -39,7 +39,7 @@ static int get_errno() noexcept
 }
 #elif defined(__linux__)
 COASYNC_ATTRIBUTE((nodiscard, always_inline))
-static consteval int get_errno() noexcept
+static /*consteval*/ int get_errno() noexcept
 {
   return errno;
 }
