@@ -21,6 +21,8 @@ endif()
 
 option(COASYNC_TEST "Build the tests" ${COASYNC_MASTER_PROJECT})
 
+add_compile_options(-fcoroutines -fconcepts -freport-bug -Wno-interference-size)
+
 # only override the warning options if we're build as the master
 # project, in other cases leave them alone since we might be added
 # to a project with laxer standards for dealing with warnings

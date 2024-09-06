@@ -5,6 +5,7 @@
 #include "basic_lockable.hpp"
 #include "spin_loop_pause.hpp"
 #include <thread>
+#include <mutex>
 #include <array>
 #if defined(__cpp_lib_memory_resource)
 # include <memory_resource>
@@ -189,7 +190,7 @@ private:
   std::pmr::monotonic_buffer_resource 				_M_monotonic_buffer
   {
     &_M_remote_buffer, std::size(_M_remote_buffer), std::pmr::new_delete_resource()
-  };
+  }; //
 };
 }
 }

@@ -58,10 +58,10 @@ struct basic_socket_service
     if(alternative_lock.owns_lock()) COASYNC_ATTRIBUTE((likely)) alternative_lock.unlock();
     if constexpr(subscribe_sockin)
       recipient._M_select_result
-        = ::select(recipient._M_max_fdsock, &recipient._M_fdset_image, nullptr, nullptr, &recipient._M_timevalue);
+        = ::select(recipient._M_max_fdsock, &recipient._M_fdset_image, nullptr, nullptr, const_cast<timeval *>(&recipient._M_timevalue));
     else
       recipient._M_select_result
-        = ::select(recipient._M_max_fdsock, nullptr, &recipient._M_fdset_image, nullptr, &recipient._M_timevalue);
+        = ::select(recipient._M_max_fdsock, nullptr, &recipient._M_fdset_image, nullptr, const_cast<timeval *>(&recipient._M_timevalue));
     if(recipient._M_select_result == -1) COASYNC_ATTRIBUTE((unlikely))
       {
         if(detail::get_errno() == get_error_code(EINTR)) COASYNC_ATTRIBUTE((likely)) return;
