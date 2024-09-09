@@ -30,15 +30,23 @@ awaitable<std::string> receive_exactly(__basic_socket<tcp, execution_context>& s
 /// a composed asynchronous operation that reads data into a dynamic buffer sequence,
 /// or into a streambuf, until it contains a delimiter, matches a regular expression,
 /// or a function object indicates a match.
+struct receive_until_result {
+	std::string 									transferred;
+	std::string::difference_type 	sentinel;
+#if __cplusplus > 201703L && __cpp_impl_three_way_comparison >= 201907L
+    COASYNC_ATTRIBUTE((nodiscard, always_inline)) friend bool
+    operator==(const receive_until_result&, const receive_until_result&) noexcept = default;
+#endif
+};
 template <typename execution_context>
 COASYNC_ATTRIBUTE((nodiscard))
-awaitable<std::string> receive_until(__basic_socket<tcp, execution_context>& socket, std::string_view delimeter)
+awaitable<receive_until_result> receive_until(__basic_socket<tcp, execution_context>& socket, std::string_view delimeter)
 {
   COASYNC_ATTRIBUTE((gnu::uninitialized)) socket_option::receive_buffer_size recvbuf;
   socket.get_option(recvbuf);
-  COASYNC_ATTRIBUTE((gnu::uninitialized)) std::string result;
-  COASYNC_ATTRIBUTE((gnu::uninitialized)) std::string::size_type sentinel;
-  COASYNC_ATTRIBUTE((gnu::uninitialized)) std::string fragment;
+  COASYNC_ATTRIBUTE((gnu::uninitialized)) std::string 									result;
+  COASYNC_ATTRIBUTE((gnu::uninitialized)) std::string::difference_type 	sentinel;
+  COASYNC_ATTRIBUTE((gnu::uninitialized)) std::string 									fragment;
   fragment.resize(recvbuf.get());
   do
     {
@@ -48,8 +56,7 @@ awaitable<std::string> receive_until(__basic_socket<tcp, execution_context>& soc
       result.append(fragment, 0, incoming_bytes);
     }
   while((sentinel = result.rfind(delimeter)) == std::string::npos);
-  result.erase(result.cbegin() + sentinel + delimeter.size(), result.cend());
-  co_return result;
+  co_return receive_until_result { std::move(result), sentinel };
 }
 /// a composed asynchronous operation that reads data into a dynamic buffer sequence,
 /// or into a streambuf, it indicates that a read or write operation should continue until a minimum number
