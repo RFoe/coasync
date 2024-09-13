@@ -35,4 +35,26 @@ template <typename Class> struct meta: std::false_type {};
 }
 }
 
+#define _COASYNC_MEMBER_FIELD(_S, _Pt) coasync::detail::member_field(&_S::_Pt, #_Pt)
+#define _COASYNC_ARGS_ENWRAP_0(...)
+#define _COASYNC_ARGS_ENWRAP_1(_S, _1) \
+	_COASYNC_MEMBER_FIELD(_S, _1)
+#define _COASYNC_ARGS_ENWRAP_2(_S, _1, _2) \
+	_COASYNC_MEMBER_FIELD(_S, _1), _COASYNC_MEMBER_FIELD(_S, _2)
+#define _COASYNC_ARGS_ENWRAP_3(_S, _1, _2, _3) \
+	_COASYNC_MEMBER_FIELD(_S, _1), _COASYNC_MEMBER_FIELD(_S, _2), _COASYNC_MEMBER_FIELD(_S, _3)
+#define _COASYNC_ARGS_ENWRAP_4(_S, _1, _2, _3, _4) \
+	_COASYNC_MEMBER_FIELD(_S, _1), _COASYNC_MEMBER_FIELD(_S, _)2, _COASYNC_MEMBER_FIELD(_S, _3), _COASYNC_MEMBER_FIELD(_S, _4)
+#define _COASYNC_ARGS_ENWRAP_5(_S, _1, _2, _3, _4, _5) \
+	_COASYNC_MEMBER_FIELD(_S, _1), _COASYNC_MEMBER_FIELD(_S, _2), _COASYNC_MEMBER_FIELD(_S, _3), _COASYNC_MEMBER_FIELD(_S, _4), _COASYNC_MEMBER_FIELD(_S, _5)
+#define COASYNC_ARGS_ENWRAP(_S, ...) _COASYNC_ARGS_ENWRAP_INTERNAL(_S, COASYNC_COUNT(__VA_ARGS__), __VA_ARGS__)
+#define _COASYNC_ARGS_ENWRAP_INTERNAL(_S, _N, ...) COASYNC_CONCAT(_COASYNC_ARGS_ENWRAP_, _N)(_S, __VA_ARGS__)
+
+#include <tuple>
+
+#define struct_meta(_S, ...) \
+template <> struct coasync::detail::meta<_S> { \
+	static constexpr auto fields = std::make_tuple(COASYNC_ARGS_ENWRAP(_S, __VA_ARGS__)); \
+};
+
 #endif

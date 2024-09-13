@@ -35,6 +35,10 @@
 /// provide the unified standard syntax for implementation-defined language extensions,
 /// such as the GNU and IBM language extensions __attribute__((...)), Microsoft extension __declspec(), etc.
 
+#define COASYNC_COUNT(...) _COASYNC_COUNT_INTERNAL(__VA_ARGS__, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0)
+#define _COASYNC_COUNT_INTERNAL(_1, _2, _3, _4, _5, _6, _7, _8, _9, _No, ...) _No
+#define COASYNC_CONCAT(_A, _B) _A ## _B
+
 #define COASYNC_CAT_(_XP, ...)    _XP##__VA_ARGS__
 #define COASYNC_CAT(_XP, ...)     COASYNC_CAT_(_XP, __VA_ARGS__)
 
