@@ -6,9 +6,10 @@ namespace COASYNC_ATTRIBUTE((gnu::visibility("default"))) coasync
 {
 namespace COASYNC_ATTRIBUTE((gnu::visibility("default"))) detail
 {
-struct universal_type {
-	template <typename T>
-	consteval operator T() const noexcept;
+struct universal_type
+{
+  template <typename T>
+  consteval operator T() const noexcept;
 };
 
 template <std::size_t> struct magic_get_impl;
@@ -29,16 +30,22 @@ magic_get_impl_xmacro(5, _1, _2, _3, _4, _5);
 #undef magic_get_impl_xmacro
 
 template <typename T, typename... Args> requires std::is_aggregate_v<T>
-COASYNC_ATTRIBUTE((nodiscard, always_inline)) consteval std::size_t struct_arity() noexcept {
- if constexpr(std::is_empty_v<T>) return 0;
- if constexpr(not requires{T { std::declval<Args>() ...}; })
-		return sizeof...(Args) - 1;
-	else return struct_arity<T, Args ..., universal_type>();
+COASYNC_ATTRIBUTE((nodiscard, always_inline)) consteval std::size_t struct_arity() noexcept
+{
+  if constexpr(std::is_empty_v<T>) return 0;
+  if constexpr(not requires{T { std::declval<Args>() ...}; })
+    return sizeof...(Args) - 1;
+  else return struct_arity<T, Args ..., universal_type>();
 }
 
+// very basic reflection that gives you access to structure elements by index and
+// provides other std::tuple like methods for user defined types without any
+// macro or boilerplate code.
+
 template <std::size_t struct_arity, std::size_t target, typename T> requires std::is_aggregate_v<T>
-COASYNC_ATTRIBUTE((nodiscard, always_inline)) constexpr auto& magic_get(T& value) noexcept {
-	return magic_get_impl<struct_arity>::template get<target>(value);
+COASYNC_ATTRIBUTE((nodiscard, always_inline)) constexpr auto& magic_get(T& value) noexcept
+{
+  return magic_get_impl<struct_arity>::template get<target>(value);
 }
 
 }

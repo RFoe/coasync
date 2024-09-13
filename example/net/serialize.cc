@@ -1,10 +1,10 @@
-#include "../include/coasync/execution_context.hpp"
-#include "../include/coasync/co_spawn.hpp"
-#include "../include/coasync/this_coro.hpp"
-#include "../include/coasync/net/socket.hpp"
-#include "../include/coasync/net/protocol.hpp"
-#include "../include/coasync/net/endpoint.hpp"
-#include "../include/coasync/net/serde_stream.hpp"
+#include "../../include/coasync/execution_context.hpp"
+#include "../../include/coasync/co_spawn.hpp"
+#include "../../include/coasync/this_coro.hpp"
+#include "../../include/coasync/net/socket.hpp"
+#include "../../include/coasync/net/protocol.hpp"
+#include "../../include/coasync/net/endpoint.hpp"
+#include "../../include/coasync/net/serde_stream.hpp"
 #include <iostream>
 using namespace coasync;
 awaitable<void> serial()
@@ -15,16 +15,13 @@ awaitable<void> serial()
   std::vector<int> vec {};
   for(unsigned int count {}; count < 10; count ++) vec.push_back(count);
   co_await s.serialize(vec);
-	co_await s.flush();
   std::queue<int> que {};
   for(unsigned int count {}; count < 10; count ++) que.push(count);
   co_await s.serialize(que);
-	co_await s.flush();
-//	while(true) std::getchar();
 }
 int main()
 {
-  execution_context context {0};
+  execution_context context {2};
   co_spawn(context, serial(), use_detach);
   context.loop();
 }

@@ -1,10 +1,10 @@
-#include "../include/coasync/execution_context.hpp"
-#include "../include/coasync/co_spawn.hpp"
-#include "../include/coasync/this_coro.hpp"
-#include "../include/coasync/net/endpoint.hpp"
-#include "../include/coasync/net/acceptor.hpp"
-#include "../include/coasync/net/protocol.hpp"
-#include "../include/coasync/net/serde_stream.hpp"
+#include "../../include/coasync/execution_context.hpp"
+#include "../../include/coasync/co_spawn.hpp"
+#include "../../include/coasync/this_coro.hpp"
+#include "../../include/coasync/net/endpoint.hpp"
+#include "../../include/coasync/net/acceptor.hpp"
+#include "../../include/coasync/net/protocol.hpp"
+#include "../../include/coasync/net/serde_stream.hpp"
 
 using namespace coasync;
 
@@ -33,7 +33,7 @@ awaitable<void> acceptance() noexcept
 }
 
 int main() {
-	  execution_context context {0};
+	  execution_context context {2};
 	  co_spawn(context, acceptance(), use_detach);
 	  context.loop();
 }
