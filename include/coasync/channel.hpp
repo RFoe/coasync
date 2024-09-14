@@ -1,5 +1,10 @@
 #ifndef COASYNC_CHANNEL_INCLUDED
 #define COASYNC_CHANNEL_INCLUDED
+
+#if defined(_MSC_VER) && (_MSC_VER >= 1200)
+# pragma once
+#endif // defined(_MSC_VER) && (_MSC_VER >= 1200)
+
 #include "detail/suspendible.hpp"
 #include "detail/service/dequeue_service.hpp"
 #include "detail/service/enqueue_service.hpp"

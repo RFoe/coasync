@@ -1,9 +1,9 @@
-#include "../include/coasync/execution_context.hpp"
-#include "../include/coasync/this_coro.hpp"
-#include "../include/coasync/net/endpoint.hpp"
-#include "../include/coasync/net/protocol.hpp"
-#include "../include/coasync/net/acceptor.hpp"
-#include "../include/coasync/net/rpc/rpc_server.hpp"
+#include "../../../include/coasync/execution_context.hpp"
+#include "../../../include/coasync/this_coro.hpp"
+#include "../../../include/coasync/net/endpoint.hpp"
+#include "../../../include/coasync/net/protocol.hpp"
+#include "../../../include/coasync/net/acceptor.hpp"
+#include "../../../include/coasync/net/rpc/rpc_server.hpp"
 using namespace coasync;
 awaitable<void> test() noexcept {
   net::tcp::acceptor acceptor

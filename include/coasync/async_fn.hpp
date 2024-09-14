@@ -1,6 +1,10 @@
 #ifndef COASYNC_ASYNC_FN_INCLUDED
 #define COASYNC_ASYNC_FN_INCLUDED
 
+#if defined(_MSC_VER) && (_MSC_VER >= 1200)
+# pragma once
+#endif // defined(_MSC_VER) && (_MSC_VER >= 1200)
+
 #include "awaitable.hpp"
 #include "detail/meta/function_traits.hpp"
 #include <any>

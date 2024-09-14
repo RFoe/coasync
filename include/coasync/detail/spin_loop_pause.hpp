@@ -1,5 +1,10 @@
 #ifndef COASYNC_SPIN_LOOP_PAUSE_INCLUDED
 #define COASYNC_SPIN_LOOP_PAUSE_INCLUDED
+
+#if defined(_MSC_VER) && (_MSC_VER >= 1200)
+# pragma once
+#endif // defined(_MSC_VER) && (_MSC_VER >= 1200)
+
 /// Used to pause the current thread in a spin lock or other spin waiting mechanism
 /// to reduce CPU utilization. The function implements cross-platform spin wait
 /// pause instruction to improve performance on multi-core processors.
@@ -8,6 +13,7 @@
 #  if defined(MSVC)
 #    include <intrin.h>
 #  endif
+
 namespace COASYNC_ATTRIBUTE((gnu::visibility("default"))) coasync
 {
 namespace COASYNC_ATTRIBUTE((gnu::visibility("default"))) detail
@@ -43,6 +49,10 @@ COASYNC_ATTRIBUTE((always_inline)) static void __spin_loop_pause() noexcept
     || defined(__ARM_ARCH_8A__) || defined(__aarch64__))
   asm volatile("yield" ::: "memory");
 #  elif defined(_M_ARM64)
+/// void __yield(void) Note: On ARM64 platforms, this function generates the YIELD instruction.
+///  This instruction indicates that the thread is performing a task that may be temporarily
+/// suspended from execution¡ªfor example, a spinlock¡ªwithout adversely affecting the program.
+/// It enables the CPU to execute other tasks during execution cycles that would otherwise be wasted.
   __yield();
 #  else
   asm volatile("nop" ::: "memory");

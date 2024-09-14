@@ -1,7 +1,13 @@
 #ifndef COASYNC_REMOTE_QUEUE_INCLUDE
 #define COASYNC_REMOTE_QUEUE_INCLUDE
+
+#if defined(_MSC_VER) && (_MSC_VER >= 1200)
+# pragma once
+#endif // defined(_MSC_VER) && (_MSC_VER >= 1200)
+
 #include "awaitable_frame_base.hpp"
 #include "spin_loop_pause.hpp"
+
 namespace COASYNC_ATTRIBUTE((gnu::visibility("default"))) coasync
 {
 namespace COASYNC_ATTRIBUTE((gnu::visibility("default"))) detail

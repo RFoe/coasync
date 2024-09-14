@@ -1,6 +1,12 @@
 #ifndef COASYNC_MERBER_FIELD_INCLUDED
 #define COASYNC_MERBER_FIELD_INCLUDED
+
+#if defined(_MSC_VER) && (_MSC_VER >= 1200)
+# pragma once
+#endif // defined(_MSC_VER) && (_MSC_VER >= 1200)
+
 #include "../config.hpp"
+
 namespace COASYNC_ATTRIBUTE((gnu::visibility("default"))) coasync
 {
 namespace COASYNC_ATTRIBUTE((gnu::visibility("default"))) detail
@@ -34,6 +40,7 @@ member_field(T Class::*, char const*) -> member_field<T Class::*>;
 template <typename Class> struct meta: std::false_type {};
 }
 }
+/// provides us the meta info of the object via meta-object types.
 
 #define _COASYNC_MEMBER_FIELD(_S, _Pt) coasync::detail::member_field(&_S::_Pt, #_Pt)
 #define _COASYNC_ARGS_ENWRAP_0(...)

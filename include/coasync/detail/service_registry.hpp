@@ -1,5 +1,10 @@
 #ifndef COASYNC_SERVICE_REGISTRY_INCLUDED
 #define COASYNC_SERVICE_REGISTRY_INCLUDED
+
+#if defined(_MSC_VER) && (_MSC_VER >= 1200)
+# pragma once
+#endif // defined(_MSC_VER) && (_MSC_VER >= 1200)
+
 #include "config.hpp"
 #include <memory>
 #if defined(__cpp_lib_memory_resource)
@@ -7,9 +12,10 @@
 #else
 # error This library requires the use of C++17 pmr support
 #endif
+
 namespace COASYNC_ATTRIBUTE((gnu::visibility("default"))) coasync
 {
-struct execution_context;
+struct execution_context; /// forward declaration
 namespace COASYNC_ATTRIBUTE((gnu::visibility("default"))) detail
 {
 struct null_service_t
@@ -73,6 +79,9 @@ public:
     , _M_manage(&manager<service_type>::S_manage)
   {
   }
+
+	basic_service_registry& operator=(basic_service_registry const&) = delete;
+  
   friend void erase_after(basic_service_registry* position, execution_context& context)
   {
     position = position -> _M_next.load(std::memory_order_acquire);
@@ -94,7 +103,7 @@ public:
       }
   }
   template <typename service_type>
-  friend service_type& find_from(basic_service_registry* position, execution_context& context)
+  COASYNC_ATTRIBUTE((nodiscard)) friend service_type& find_from(basic_service_registry* position, execution_context& context)
   {
     std::unique_ptr<basic_service_registry> prepare =
       std::make_unique<basic_service_registry>(std::in_place_type<service_type>);

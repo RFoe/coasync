@@ -1,11 +1,17 @@
 #ifndef __COASYNC_SOCKET_INCLUDED
 #define __COASYNC_SOCKET_INCLUDED
+
+#if defined(_MSC_VER) && (_MSC_VER >= 1200)
+# pragma once
+#endif // defined(_MSC_VER) && (_MSC_VER >= 1200)
+
 #include "../detail/suspendible.hpp"
 #include "../detail/get_context.hpp"
 #include "socket_base.hpp"
 #include "option.hpp"
 #include "message_flags.hpp"
 #include <cstring>
+
 namespace COASYNC_ATTRIBUTE((gnu::visibility("default"))) coasync
 {
 namespace COASYNC_ATTRIBUTE((gnu::visibility("default"))) net

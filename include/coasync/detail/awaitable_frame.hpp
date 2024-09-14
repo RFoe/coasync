@@ -1,8 +1,14 @@
 #ifndef COASYNC_AWAITABLE_FRAME_INCLUDED
 #define COASYNC_AWAITABLE_FRAME_INCLUDED
+
+#if defined(_MSC_VER) && (_MSC_VER >= 1200)
+# pragma once
+#endif // defined(_MSC_VER) && (_MSC_VER >= 1200)
+
 #include "awaitable_frame_base.hpp"
 #include "awaitable_frame_alloc.hpp"
 #include "manual_lifetime.hpp"
+
 namespace COASYNC_ATTRIBUTE((gnu::visibility("default"))) coasync
 {
 namespace COASYNC_ATTRIBUTE((gnu::visibility("default"))) detail
@@ -58,6 +64,14 @@ struct awaitable_frame<void, Alloc> final
   using awaitable_frame_alloc<Alloc>::operator new;
   using awaitable_frame_alloc<Alloc>::operator delete;
 };
+
+template <typename> struct awaitable_frame_traits: std::false_type {};
+template <typename Ref, typename Alloc>
+struct awaitable_frame_traits<awaitable_frame<Ref, Alloc>>: std::true_type {
+	typedef Ref 	value_type;
+	typedef Alloc allocator_type;
+};
+
 }
 }
 #endif

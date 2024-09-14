@@ -1,6 +1,12 @@
 #ifndef COASYNC_AWAITABLE_INCLUDED
 #define COASYNC_AWAITABLE_INCLUDED
+
+#if defined(_MSC_VER) && (_MSC_VER >= 1200)
+# pragma once
+#endif // defined(_MSC_VER) && (_MSC_VER >= 1200)
+
 #include "detail/awaitable_frame.hpp"
+
 namespace COASYNC_ATTRIBUTE((gnu::visibility("default"))) coasync
 {
 /// The return type of a coroutine or asynchronous operation.

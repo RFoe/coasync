@@ -1,5 +1,10 @@
 #ifndef __COASYNC_ADDRESS_V6_INCLUDED
 #define __COASYNC_ADDRESS_V6_INCLUDED
+
+#if defined(_MSC_VER) && (_MSC_VER >= 1200)
+# pragma once
+#endif // defined(_MSC_VER) && (_MSC_VER >= 1200)
+
 #if defined(has_include)
 # if defined(linux)
 #  if has_include(<netinet/in.h>)
@@ -19,6 +24,7 @@
 #include <stdexcept>
 #include <format>
 #include <cstring>
+
 namespace COASYNC_ATTRIBUTE((gnu::visibility("default"))) coasync
 {
 namespace COASYNC_ATTRIBUTE((gnu::visibility("default"))) net

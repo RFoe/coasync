@@ -1,10 +1,16 @@
 #ifndef COASYNC_WHEN_ALL_INCLUDED
 #define COASYNC_WHEN_ALL_INCLUDED
+
+#if defined(_MSC_VER) && (_MSC_VER >= 1200)
+# pragma once
+#endif // defined(_MSC_VER) && (_MSC_VER >= 1200)
+
 #include "detail/service/latch_service.hpp"
 #include "detail/suspendible.hpp"
 #include "detail/object_deduce.hpp"
 #include "co_spawn.hpp"
 #include <vector>
+
 namespace COASYNC_ATTRIBUTE((gnu::visibility("default"))) coasync
 {
 namespace COASYNC_ATTRIBUTE((gnu::visibility("default"))) detail

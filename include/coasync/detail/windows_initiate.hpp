@@ -1,5 +1,10 @@
 #ifndef __COASYNC_WINDOWS_INITIATE_INCLUDED
 #define __COASYNC_WINDOWS_INITIATE_INCLUDED
+
+#if defined(_MSC_VER) && (_MSC_VER >= 1200)
+# pragma once
+#endif // defined(_MSC_VER) && (_MSC_VER >= 1200)
+
 /// The WSAStartup function must be the first Windows Sockets function called by an application
 /// or DLL. It allows an application or DLL to specify the version of Windows Sockets required
 /// and retrieve details of the specific Windows Sockets implementation. The application or DLL
@@ -15,6 +20,7 @@
 #endif
 #include <cstdio>
 #include <utility>
+
 namespace COASYNC_ATTRIBUTE((gnu::visibility("default"))) coasync
 {
 namespace COASYNC_ATTRIBUTE((gnu::visibility("default"))) detail

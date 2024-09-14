@@ -1,5 +1,10 @@
 #ifndef __COASYNC_ADDRESS_V4_INCLUDED
 #define __COASYNC_ADDRESS_V4_INCLUDED
+
+#if defined(_MSC_VER) && (_MSC_VER >= 1200)
+# pragma once
+#endif // defined(_MSC_VER) && (_MSC_VER >= 1200)
+
 #include "../detail/config.hpp"
 #if defined(has_include)
 # if defined(linux)

@@ -1,5 +1,10 @@
 #ifndef __COASYNC_SOCKET_BASE_INCLUDED
 #define __COASYNC_SOCKET_BASE_INCLUDED
+
+#if defined(_MSC_VER) && (_MSC_VER >= 1200)
+# pragma once
+#endif // defined(_MSC_VER) && (_MSC_VER >= 1200)
+
 #include "../detail/networking.hpp"
 #if defined(__has_include)
 # if defined(__linux__)
@@ -19,6 +24,7 @@
 #endif
 #include "../detail/service/socket_service.hpp"
 #include <utility>
+
 namespace COASYNC_ATTRIBUTE((gnu::visibility("default"))) coasync
 {
 namespace COASYNC_ATTRIBUTE((gnu::visibility("default"))) net

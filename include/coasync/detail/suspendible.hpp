@@ -1,9 +1,15 @@
 #ifndef COASYNC_SUSPENDIBLE_INCULDED
 #define COASYNC_SUSPENDIBLE_INCULDED
+
+#if defined(_MSC_VER) && (_MSC_VER >= 1200)
+# pragma once
+#endif // defined(_MSC_VER) && (_MSC_VER >= 1200)
+
 #include "../awaitable.hpp"
 #include "get_frame.hpp"
 #include "get_context.hpp"
 #include "spin_loop_pause.hpp"
+
 namespace COASYNC_ATTRIBUTE((gnu::visibility("default"))) coasync
 {
 namespace COASYNC_ATTRIBUTE((gnu::visibility("default"))) detail

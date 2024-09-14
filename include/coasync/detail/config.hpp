@@ -1,6 +1,10 @@
 #ifndef COASYNC_CONFIG_INCLUDED
 #define COASYNC_CONFIG_INCLUDED
 
+#if defined(_MSC_VER) && (_MSC_VER >= 1200)
+# pragma once
+#endif // defined(_MSC_VER) && (_MSC_VER >= 1200)
+
 /// Check the compilation environment
 
 #if __cplusplus < 202002L
@@ -151,9 +155,9 @@
 #if COASYNC_NVHPC()
 #  define COASYNC_ATTR_WHICH_3(_ATTR) /*nothing*/
 #elif COASYNC_MSVC()
-#  define COASYNC_ATTR_WHICH_3(_ATTR) // [[msvc::no_unique_address]]
+#  define COASYNC_ATTR_WHICH_3(_ATTR) [[msvc::no_unique_address]]
 #elif COASYNC_CLANG_CL()
-#  define COASYNC_ATTR_WHICH_3(_ATTR) // [[msvc::no_unique_address]]
+#  define COASYNC_ATTR_WHICH_3(_ATTR) [[msvc::no_unique_address]]
 #else
 #  define COASYNC_ATTR_WHICH_3(_ATTR) [[no_unique_address]]
 #endif

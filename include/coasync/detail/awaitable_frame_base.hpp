@@ -1,5 +1,10 @@
 #ifndef COASYNC_FRAME_BASE_INCLUDED
 #define COASYNC_FRAME_BASE_INCLUDED
+
+#if defined(_MSC_VER) && (_MSC_VER >= 1200)
+# pragma once
+#endif // defined(_MSC_VER) && (_MSC_VER >= 1200)
+
 #include "config.hpp"
 #if __cpp_impl_coroutine >= 201902 && __cpp_lib_coroutine >= 201902
 #  include <coroutine>

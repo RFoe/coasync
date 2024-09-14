@@ -1,5 +1,10 @@
 #ifndef __COASYNC_PROTOCOL_INCLUDED
 #define __COASYNC_PROTOCOL_INCLUDED
+
+#if defined(_MSC_VER) && (_MSC_VER >= 1200)
+# pragma once
+#endif // defined(_MSC_VER) && (_MSC_VER >= 1200)
+
 #include "../detail/config.hpp"
 #if defined(__has_include)
 # if (defined(_WIN32)  || defined(_WIN64)) && __has_include(<ws2tcpip.h>)
@@ -8,6 +13,7 @@
 #  include <sys/socket.h>
 # endif
 #endif
+
 namespace [[gnu::visibility("default")]] coasync
 {
 struct execution_context;

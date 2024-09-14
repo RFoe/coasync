@@ -1,5 +1,10 @@
 #ifndef __COASYNC_OPTION_INCLUDED
 #define __COASYNC_OPTION_INCLUDED
+
+#if defined(_MSC_VER) && (_MSC_VER >= 1200)
+# pragma once
+#endif // defined(_MSC_VER) && (_MSC_VER >= 1200)
+
 #if defined(__has_include)
 # if defined(_WIN32) || defined(_WIN64)
 #  if __has_include(<ws2tcpip.h>)
@@ -14,6 +19,7 @@
 #include "address.hpp"
 #include <utility>
 #include <chrono>
+
 namespace COASYNC_ATTRIBUTE((gnu::visibility("default"))) coasync
 {
 namespace COASYNC_ATTRIBUTE((gnu::visibility("default"))) net

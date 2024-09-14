@@ -1,5 +1,10 @@
 #ifndef COASYNC_RESOLVER_INCLUDED
 #define COASYNC_RESOLVER_INCLUDED
+
+#if defined(_MSC_VER) && (_MSC_VER >= 1200)
+# pragma once
+#endif // defined(_MSC_VER) && (_MSC_VER >= 1200)
+
 #if defined(__has_include)
 #	if defined(__linux__) && __has_include(<netdb.h>)
 #   #include<netdb.h> 							/// for ::getaddrinfo
@@ -8,6 +13,7 @@
 #include "../detail/networking.hpp" /// for detail::generic_category, ::getaddrinfo
 #include "../co_spawn.hpp"          /// for co_spawn
 #include "resolver_flags.hpp"       /// for resolver_flags
+
 namespace COASYNC_ATTRIBUTE((gnu::visibility("default"))) coasync
 {
 namespace COASYNC_ATTRIBUTE((gnu::visibility("default"))) net

@@ -1,9 +1,15 @@
 #ifndef COASYNC_THIS_CORO_INCLUDED
 #define COASYNC_THIS_CORO_INCLUDED
+
+#if defined(_MSC_VER) && (_MSC_VER >= 1200)
+# pragma once
+#endif // defined(_MSC_VER) && (_MSC_VER >= 1200)
+
 #include "detail/get_context.hpp"
 #include "detail/get_id.hpp"
 #include "detail/get_stop_token.hpp"
 #include "detail/get_frame.hpp"
+
 namespace COASYNC_ATTRIBUTE((gnu::visibility("default"))) coasync
 {
 namespace this_coro {

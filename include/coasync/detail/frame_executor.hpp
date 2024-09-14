@@ -1,5 +1,10 @@
 #ifndef COASYNC_FRAME_EXECUTOR_INCLUDED
 #define COASYNC_FRAME_EXECUTOR_INCLUDED
+
+#if defined(_MSC_VER) && (_MSC_VER >= 1200)
+# pragma once
+#endif // defined(_MSC_VER) && (_MSC_VER >= 1200)
+
 #include "remote_queue.hpp"
 #include "workstealing.hpp"
 #include "basic_lockable.hpp"
@@ -12,13 +17,14 @@
 #else
 # error This library requires the use of C++17 pmr support
 #endif
+
 namespace COASYNC_ATTRIBUTE((gnu::visibility("default"))) coasync
 {
 namespace COASYNC_ATTRIBUTE((gnu::visibility("default"))) detail
 {
 struct frame_executor
 {
-  explicit frame_executor(unsigned int concurrency) noexcept
+  COASYNC_ATTRIBUTE((always_inline)) explicit frame_executor(unsigned int concurrency) noexcept
     : _M_concurrency(concurrency)
     , _M_workstealing(concurrency)
     , _M_endpoint_mutex(concurrency)
@@ -190,7 +196,10 @@ private:
   std::pmr::monotonic_buffer_resource 				_M_monotonic_buffer
   {
     &_M_remote_buffer, std::size(_M_remote_buffer), std::pmr::new_delete_resource()
-  }; //
+  };
+	/// a special-purpose memory resource class that releases the allocated memory
+	/// only when the resource is destroyed. It is intended for very fast memory allocations
+	/// in situations where memory is used to build up a few objects and then is released all at once.
 };
 }
 }

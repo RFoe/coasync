@@ -1,5 +1,10 @@
 #ifndef __COASYNC_MESSAGE_FLAGS_INCLUDED
 #define __COASYNC_MESSAGE_FLAGS_INCLUDED
+
+#if defined(_MSC_VER) && (_MSC_VER >= 1200)
+# pragma once
+#endif // defined(_MSC_VER) && (_MSC_VER >= 1200)
+
 #include "../detail/config.hpp"
 #if defined(__has_include)
 # if defined(_WIN32) || defined(_WIN64)
@@ -12,6 +17,7 @@
 #  endif
 # endif
 #endif
+
 namespace COASYNC_ATTRIBUTE((gnu::visibility("default"))) coasync
 {
 namespace COASYNC_ATTRIBUTE((gnu::visibility("default"))) net

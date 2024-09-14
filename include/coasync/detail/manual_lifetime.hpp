@@ -1,8 +1,14 @@
 #ifndef COASYNIO_MANUAL_LIFETIME_INCLUDED
 #define COASYNIO_MANUAL_LIFETIME_INCLUDED
+
+#if defined(_MSC_VER) && (_MSC_VER >= 1200)
+# pragma once
+#endif // defined(_MSC_VER) && (_MSC_VER >= 1200)
+
 #include "config.hpp"
 #include <new>
 #include <utility>
+
 namespace COASYNC_ATTRIBUTE((gnu::visibility("default"))) coasync
 {
 namespace COASYNC_ATTRIBUTE((gnu::visibility("default"))) detail

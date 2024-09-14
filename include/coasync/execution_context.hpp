@@ -1,10 +1,16 @@
 #ifndef COASYNC_EXECUTION_CONTEXT_INCLUDED
 #define COASYNC_EXECUTION_CONTEXT_INCLUDED
+
+#if defined(_MSC_VER) && (_MSC_VER >= 1200)
+# pragma once
+#endif // defined(_MSC_VER) && (_MSC_VER >= 1200)
+
 #include "detail/frame_executor.hpp"
 #include "detail/frame_lifetime.hpp"
 #include "detail/service_registry.hpp"
 #include "detail/windows_initiate.hpp"
 #include "detail/spin_loop_pause.hpp"
+
 namespace COASYNC_ATTRIBUTE((gnu::visibility("default"))) coasync
 {
 struct execution_context

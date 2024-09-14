@@ -1,9 +1,16 @@
 #ifndef COASYNC_SERDE_STREAM_INCLUDED
 #define COASYNC_SERDE_STREAM_INCLUDED
+
+#if defined(_MSC_VER) && (_MSC_VER >= 1200)
+# pragma once
+#endif // defined(_MSC_VER) && (_MSC_VER >= 1200)
+
 #include "../detail/meta/serde_stream_base.hpp"
+#include "socket.hpp"
 #include "send.hpp"
 #include "receive.hpp"
 #include <sstream>
+
 namespace COASYNC_ATTRIBUTE((gnu::visibility("default"))) coasync
 {
 namespace COASYNC_ATTRIBUTE((gnu::visibility("default"))) net

@@ -1,7 +1,13 @@
 #ifndef COASYNC_CO_BIND_INCLUDED
 #define COASYNC_CO_BIND_INCLUDED
+
+#if defined(_MSC_VER) && (_MSC_VER >= 1200)
+# pragma once
+#endif // defined(_MSC_VER) && (_MSC_VER >= 1200)
+
 #include "co_spawn.hpp"
 #include <functional>
+
 namespace COASYNC_ATTRIBUTE((gnu::visibility("default"))) coasync
 {
 /// Encapsulates the synchronous function as asynchronous awaitable type

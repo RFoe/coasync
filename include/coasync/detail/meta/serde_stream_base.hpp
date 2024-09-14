@@ -1,5 +1,10 @@
 #ifndef COASYNC_SERDE_STREAM_BASE_INCLUDED
 #define COASYNC_SERDE_STREAM_BASE_INCLUDED
+
+#if defined(_MSC_VER) && (_MSC_VER >= 1200)
+# pragma once
+#endif // defined(_MSC_VER) && (_MSC_VER >= 1200)
+
 #include "../../awaitable.hpp"
 #include "../variant"
 #include "member_field.hpp"
@@ -144,6 +149,7 @@ private:
   {
     typedef typename Containter::const_iterator iterator;
     typedef typename Containter::size_type size_type;
+    COASYNC_ATTRIBUTE((nodiscard, always_inline))
     iterator begin() const noexcept
     {
       return this->c.cbegin();
@@ -164,6 +170,7 @@ private:
   {
     typedef typename Container::const_iterator iterator;
     typedef typename Container::size_type size_type;
+    COASYNC_ATTRIBUTE((nodiscard, always_inline))
     iterator begin() const noexcept
     {
       return this->c.cbegin();
@@ -235,7 +242,7 @@ public:
     else if constexpr(std::is_aggregate_v<T>)
         return deserialize_impl(aggregate_tag, value);
   }
-private:
+protected:
   template <typename T>
   COASYNC_ATTRIBUTE((nodiscard))
   awaitable<void> COASYNC_API serialize_impl(COASYNC_ATTRIBUTE((maybe_unused)) smallint_tag_t, T const& value)

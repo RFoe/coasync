@@ -1,5 +1,10 @@
 #ifndef COASYNC_RESOLVER_FLAGS_INCLUDED
 #define COASYNC_RESOLVER_FLAGS_INCLUDED
+
+#if defined(_MSC_VER) && (_MSC_VER >= 1200)
+# pragma once
+#endif // defined(_MSC_VER) && (_MSC_VER >= 1200)
+
 #include "../detail/config.hpp"
 #if defined(__has_include)
 # if defined(_WIN32) || defined(_WIN64)
@@ -12,6 +17,7 @@
 #  endif
 # endif
 #endif
+
 enum class resolver_flags : int { };
 /// Flags that indicate options used in the getaddrinfo function.
 /// Supported values for the ai_flags member can be a combination of the following options.

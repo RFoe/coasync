@@ -1,8 +1,14 @@
 #ifndef __COASYNC_BASIC_LOCKABLE_INCLUDED
 #define __COASYNC_BASIC_LOCKABLE_INCLUDED
+
+#if defined(_MSC_VER) && (_MSC_VER >= 1200)
+# pragma once
+#endif // defined(_MSC_VER) && (_MSC_VER >= 1200)
+
 #include "config.hpp"
 #include "spin_loop_pause.hpp"
 #include <atomic>
+
 namespace COASYNC_ATTRIBUTE((gnu::visibility("default"))) coasync
 {
 namespace COASYNC_ATTRIBUTE((gnu::visibility("default"))) detail
@@ -12,7 +18,7 @@ struct basic_lockable
 {
   COASYNC_ATTRIBUTE((always_inline)) void lock() noexcept
   {
-    bool desired = false;
+    COASYNC_ATTRIBUTE((gnu::uninitialized)) bool desired;
     do
       {
 #if defined(__cpp_lib_atomic_wait)
@@ -33,7 +39,7 @@ struct basic_lockable
   }
   COASYNC_ATTRIBUTE((always_inline)) void unlock() noexcept
   {
-    if (not _M_locked.load(std::memory_order_acquire)) [[unlikely]]
+    if (not _M_locked.load(std::memory_order_acquire)) COASYNC_ATTRIBUTE((unlikely))
       return;
     _M_locked.store(false, std::memory_order_release);
 #if defined(__cpp_lib_atomic_wait)

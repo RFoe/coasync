@@ -1,8 +1,14 @@
 #ifndef __COASYNC_ADDRESS_INCLUDED
 #define __COASYNC_ADDRESS_INCLUDED
+
+#if defined(_MSC_VER) && (_MSC_VER >= 1200)
+# pragma once
+#endif // defined(_MSC_VER) && (_MSC_VER >= 1200)
+
 #include "address_v4.hpp"
 #include "address_v6.hpp"
 #include <variant>
+
 namespace COASYNC_ATTRIBUTE((gnu::visibility("default"))) coasync
 {
 namespace COASYNC_ATTRIBUTE((gnu::visibility("default"))) net

@@ -1,9 +1,15 @@
 #ifndef COASYNC_FRAME_LIFETIME_INCLUDED
 #define COASYNC_FRAME_LIFETIME_INCLUDED
+
+#if defined(_MSC_VER) && (_MSC_VER >= 1200)
+# pragma once
+#endif // defined(_MSC_VER) && (_MSC_VER >= 1200)
+
 #include "frame_delegate.hpp"
 #include "basic_lockable.hpp"
 #include <forward_list>
 #include <mutex>
+
 namespace COASYNC_ATTRIBUTE((gnu::visibility("default"))) coasync
 {
 namespace COASYNC_ATTRIBUTE((gnu::visibility("default"))) detail
@@ -15,7 +21,8 @@ struct frame_lifetime
 private:
   struct value_type
   {
-    value_type(std::coroutine_handle<awaitable_frame_base> frame, frame_delegate::delegate_type fp) noexcept
+    COASYNC_ATTRIBUTE((always_inline))
+		value_type(std::coroutine_handle<awaitable_frame_base> frame, frame_delegate::delegate_type fp) noexcept
       : _M_frame(frame)
       , _M_delegate(fp)
         /// The semaphore is initialized to the available state

@@ -1,5 +1,10 @@
 #ifndef COASYNC_AWAITABLE_FRAME_ALLOC_INCLUDED
 #define COASYNC_AWAITABLE_FRAME_ALLOC_INCLUDED
+
+#if defined(_MSC_VER) && (_MSC_VER >= 1200)
+# pragma once
+#endif // defined(_MSC_VER) && (_MSC_VER >= 1200)
+
 #include "config.hpp"
 #if __cpp_impl_coroutine >= 201902 && __cpp_lib_coroutine >= 201902
 #  include <coroutine>
@@ -26,6 +31,15 @@ static constexpr std::size_t aligned_allocation_size(std::size_t s, std::size_t 
 {
   return (s + a - 1) & ~(a - 1);
 }
+/// https://en.cppreference.com/w/cpp/language/coroutines
+/// Coroutine state is allocated dynamically via non-array operator new.
+/// If the Promise type defines a class-level replacement, it will be used,
+/// otherwise global operator new will be used.
+/// If the Promise type defines a placement form of operator new that takes
+/// additional parameters, and they match an argument list where the first argument
+/// is the size requested (of type std::size_t) and the rest are the coroutine
+/// function arguments, those arguments will be passed to operator new
+/// (this makes it possible to use leading-allocator-convention for coroutines).
 template<typename Alloc>
 struct  awaitable_frame_alloc
 {

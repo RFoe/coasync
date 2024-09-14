@@ -1,6 +1,10 @@
 #ifndef COASYNC_FUNCTION_TRAITS_INCLUDED
 #define COASYNC_FUNCTION_TRAITS_INCLUDED
 
+#if defined(_MSC_VER) && (_MSC_VER >= 1200)
+# pragma once
+#endif // defined(_MSC_VER) && (_MSC_VER >= 1200)
+
 #include "../config.hpp"
 #include <functional>
 
