@@ -28,7 +28,7 @@ struct basic_enqueue_service
     std::coroutine_handle<awaitable_frame_base> _M_frame;
     composed_context 														_M_context;
   };
-  template <typename Value, typename Mutex>
+  template <typename Value, typename Container, typename Mutex>
   struct delegator
   {
     COASYNC_ATTRIBUTE((nodiscard, always_inline))
@@ -37,18 +37,18 @@ struct basic_enqueue_service
       COASYNC_ATTRIBUTE((gnu::uninitialized)) bool queue_producable;
       std::lock_guard l { * static_cast<Mutex*>(mutex) };
       /// Check whether data is out of bound and injected, and lock to prevent data race
-      queue_producable = static_cast<std::queue<Value> *>(queue) -> size() < bound;
+      queue_producable = static_cast<std::queue<Value, Container> *>(queue) -> size() < bound;
       if(queue_producable) COASYNC_ATTRIBUTE((unlikely))
-        static_cast<std::queue<Value> *>(queue) -> emplace(std::move(*static_cast<Value*>(value)));
+        static_cast<std::queue<Value, Container> *>(queue) -> emplace(std::move(*static_cast<Value*>(value)));
       return queue_producable;
     }
   };
   explicit basic_enqueue_service(execution_context& context) noexcept: _M_context(context) {}
-  template <typename Value, typename Mutex>
+  template <typename Value, typename Container, typename Mutex>
   void post_frame(
     std::coroutine_handle<awaitable_frame_base> frame,
     /// post_frame overlaps
-    std::queue<Value>& 	queue,
+    std::queue<Value, Container>& 	queue,
     Value& 							value,
     Mutex& 							mutex,
     std::size_t 				bound)
@@ -59,7 +59,7 @@ struct basic_enqueue_service
     /// check parrallelism
     _M_forward.emplace_front(frame, composed_context
     {
-      &queue, &value, &mutex, bound, &delegator<Value, Mutex>::S_delegate
+      &queue, &value, &mutex, bound, &delegator<Value, Container, Mutex>::S_delegate
     });
   }
   void commit_frame()

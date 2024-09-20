@@ -6,6 +6,7 @@
 #endif // defined(_MSC_VER) && (_MSC_VER >= 1200)
 
 #include "detail/suspendible.hpp"
+#include "detail/ring_container.hpp"
 #include "detail/service/dequeue_service.hpp"
 #include "detail/service/enqueue_service.hpp"
 namespace COASYNC_ATTRIBUTE((gnu::visibility("default"))) coasync
@@ -49,7 +50,7 @@ struct channel
   }
 private:
   mutable Mutex 						_M_mutex;
-  std::queue<Value> 				_M_queue;
+  std::queue<Value, ring_container<Value, Bound>> 				_M_queue;
 };
 }
 #endif

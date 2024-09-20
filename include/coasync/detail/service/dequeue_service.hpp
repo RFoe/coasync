@@ -26,7 +26,7 @@ struct basic_dequeue_service
     std::coroutine_handle<awaitable_frame_base> _M_frame;
     composed_context 														_M_context;
   };
-  template <typename Value, typename Mutex>
+  template <typename Value, typename Container, typename Mutex>
   struct delegator
   {
     COASYNC_ATTRIBUTE((nodiscard, always_inline))
@@ -35,21 +35,21 @@ struct basic_dequeue_service
       COASYNC_ATTRIBUTE((gnu::uninitialized)) bool queue_consumable;
       std::lock_guard l { * static_cast<Mutex*>(mutex) };
       /// Check whether data is available and ejected, and lock to prevent data race
-      queue_consumable = not static_cast<std::queue<Value> *>(queue) -> empty();
+      queue_consumable = not static_cast<std::queue<Value, Container> *>(queue) -> empty();
       if(queue_consumable) COASYNC_ATTRIBUTE((unlikely))
         {
-          ::new(value) Value { std::move(static_cast<std::queue<Value> *>(queue) -> front()) };
-          static_cast<std::queue<Value> *>(queue) -> pop();
+          ::new(value) Value { std::move(static_cast<std::queue<Value, Container> *>(queue) -> front()) };
+          static_cast<std::queue<Value, Container> *>(queue) -> pop();
         }
       return queue_consumable;
     }
   };
   explicit basic_dequeue_service(execution_context& context) noexcept: _M_context(context) {}
-  template <typename Value, typename Mutex>
+  template <typename Value, typename Container, typename Mutex>
   void post_frame(
     std::coroutine_handle<awaitable_frame_base> frame,
     /// post_frame overlaps
-    std::queue<Value>& 	queue,
+    std::queue<Value, Container>& 	queue,
     Value& 							value,
     Mutex& 							mutex)
   {
@@ -60,7 +60,7 @@ struct basic_dequeue_service
     /// Locking is not required for single thread
     _M_forward.emplace_front(frame, composed_context
     {
-      &queue, &value, &mutex, &delegator<Value, Mutex>::S_delegate
+      &queue, &value, &mutex, &delegator<Value, Container, Mutex>::S_delegate
     });
   }
   void commit_frame()
