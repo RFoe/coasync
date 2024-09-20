@@ -51,6 +51,7 @@ public:
       try
         {
           co_await __stream.deserialize(args);
+          std::this_thread::sleep_for(std::chrono::seconds(2));
           co_await __stream.serialize(std::apply(__f, args));
         }
       catch(std::system_error& err)

@@ -33,6 +33,7 @@ public:
       R _M_value;
     } __storage;
 		co_await _M_stream.deserialize((R &)__storage._M_value);
+		std::puts("get result");
 		co_return std::move(__storage._M_value);
   }
 private:

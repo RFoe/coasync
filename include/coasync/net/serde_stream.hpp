@@ -25,14 +25,17 @@ struct __serde_stream: detail::serde_stream_base<__serde_stream<execution_contex
   using allocator_type = 	std::stringstream::allocator_type;
   using detail::serde_stream_base<__serde_stream>::serialize;
   using detail::serde_stream_base<__serde_stream>::deserialize;
-  __serde_stream(__basic_socket<tcp, execution_context> socket) noexcept
+
+	COASYNC_ATTRIBUTE((always_inline))
+	constexpr __serde_stream(__basic_socket<tcp, execution_context> socket) noexcept
     : _M_socket(std::move(socket)) {}
-  COASYNC_ATTRIBUTE((nodiscard))
+
+	COASYNC_ATTRIBUTE((nodiscard))
   awaitable<void> read(char_type* s, std::streamsize count)
   {
   	/// If there are not enough bytes of data in the current buffer, more data
 		/// needs to be read from the socket.
-    if(_M_available < count)
+    if(_M_available < count) COASYNC_ATTRIBUTE((unlikely))
       {
         std::string buffer = co_await receive_at_least(_M_socket, count);
         _M_buffer.write(buffer.data(), buffer.size());

@@ -1,21 +1,23 @@
-#include "../include/coasync/execution_context.hpp"
-#include "../include/coasync/co_spawn.hpp"
-#include "../include/coasync/net/socket.hpp"
-#include "../include/coasync/net/send.hpp"
-#include "../include/coasync/net/protocol.hpp"
-#include "../include/coasync/net/endpoint.hpp"
-#include "../include/coasync/this_coro.hpp"
+#include "../../include/coasync/execution_context.hpp"
+#include "../../include/coasync/co_spawn.hpp"
+#include "../../include/coasync/net/socket.hpp"
+#include "../../include/coasync/net/send.hpp"
+#include "../../include/coasync/net/protocol.hpp"
+#include "../../include/coasync/net/endpoint.hpp"
+#include "../../include/coasync/this_coro.hpp"
 #include <iostream>
 using namespace coasync;
 
 awaitable<void> do_send() {
 	net::tcp::socket socket { co_await this_coro::context, net::tcp::v4() };
   co_await socket.connect(net::tcp::endpoint{net::address_v4::loopback(), 10086});
+  std::puts("connected.");
 	std::string send_bytes;
 	while(true) {
+		std::puts("print message");
 		std::getline(std::cin, send_bytes);
 		if(send_bytes.compare("quit") == 0) co_return;
-		co_await send_exacly(socket, send_bytes);
+		co_await send_exactly(socket, send_bytes);
 	}
 }
 

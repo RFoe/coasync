@@ -10,14 +10,15 @@
 #include "socket_base.hpp"
 #include "option.hpp"
 #include "message_flags.hpp"
+//#include "protocol.hpp"
 #include <cstring>
 
 namespace COASYNC_ATTRIBUTE((gnu::visibility("default"))) coasync
 {
 namespace COASYNC_ATTRIBUTE((gnu::visibility("default"))) net
 {
-struct tcp;
-struct udp;
+struct tcp; // forward declaration
+struct udp; // forward declaration
 /// provides asynchronous and nonblocking stream/datagram-oriented socket functionality.
 template <typename Range>
 concept buffer_constrait = std::ranges::contiguous_range<Range>
