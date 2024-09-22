@@ -87,7 +87,7 @@ struct basic_select_socket_service
     for(std::coroutine_handle<awaitable_frame_base> frame: outstanding)
       _M_context.push_frame_to_executor(frame);
   }
-  void COASYNC_API cancel_frame(__native_handle sockfd)
+  COASYNC_ATTRIBUTE((always_inline)) void COASYNC_API cancel_frame(__native_handle sockfd)
   {
     std::forward_list<std::coroutine_handle<awaitable_frame_base>> deprecated;
     COASYNC_ATTRIBUTE((maybe_unused)) std::unique_lock<basic_lockable>              alternative_lock;

@@ -90,7 +90,7 @@
 <!-- USAGE EXAMPLES -->
 ## Usage
 
-### when_any/when_any algorithm
+### when_all/when_any algorithm
  -- `when_all` is a awaitable generator that returns a awaitable that completes when the last of the input awaitables completes. It sends a pack of values, where the elements of said pack are the values sent by the input awaitables, in order.
  -- `when_any` is a awaitable generator that returns a awaitable that completes when the first of the input awaitables completes[or throws]. It sends a variant of values, where the element of that are the value sent by the first awaitable. Coasync supports for cancelling an operation, by send stop_request using std::stop_token/std::stop_source
 ``` cpp

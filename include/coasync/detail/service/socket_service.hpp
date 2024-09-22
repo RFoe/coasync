@@ -27,7 +27,7 @@ namespace COASYNC_ATTRIBUTE((gnu::visibility("default"))) coasync
 {
 namespace COASYNC_ATTRIBUTE((gnu::visibility("default"))) detail
 {
-typedef epoll_socketin_service 	sockin_service;
+typedef epoll_socketin_service 		sockin_service;
 typedef epoll_socketout_service 	sockout_service;
 }
 }
