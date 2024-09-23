@@ -4,7 +4,7 @@
  * The container must satisfy the requirements of SequenceContainer. Additionally,
  * it must provide the following functions with the usual semantics:
  **/
- 
+
 /// A SequenceContainer is a Container that stores objects of the same type in a linear arrangement.
 
 #ifndef COASYNC_RING_CONTAINER_INCLUDED
@@ -18,12 +18,12 @@
 
 #include <array>
 
-template <typename T, std::size_t N> requires (N > 0)
+template <typename T, std::size_t N> requires std::is_default_constructible_v<T> and (N > 0)
 struct [[nodiscard]] ring_container: public std::array<T, N>
 {
 private:
-	template <typename... Args>
-	static constexpr bool is_self = sizeof...(Args) == 1 and (std::is_same_v<std::decay_t<Args>, ring_container> || ...);
+  template <typename... Args>
+  static constexpr bool is_self = sizeof...(Args) == 1 and (std::is_same_v<std::decay_t<Args>, ring_container> || ...);
 public:
   typedef std::array<T, N>::reference reference;
   typedef std::array<T, N>::const_reference const_reference;
@@ -38,9 +38,9 @@ public:
   typedef std::array<T, N>::size_type size_type;
   using std::array<T, N>::operator[];
 
-	//  std::array supports assignment from a braced-init-list, but not from an std::initializer_list.
+  //  std::array supports assignment from a braced-init-list, but not from an std::initializer_list.
   template <typename... CtorArgs> requires (not is_self<CtorArgs ...>)
-	COASYNC_ATTRIBUTE((always_inline))
+  COASYNC_ATTRIBUTE((always_inline))
   constexpr ring_container(CtorArgs&& ... ctorargs)
   noexcept(std::is_nothrow_constructible_v<std::array<T, N>, CtorArgs ...>)
     : std::array<T, N>(std::forward<CtorArgs>(ctorargs) ...)
@@ -51,14 +51,15 @@ public:
   }
   constexpr ring_container(ring_container const&) noexcept = default;
   constexpr ring_container& operator=(ring_container const&) noexcept = default;
-  constexpr ring_container(ring_container &&) noexcept = default;
-  constexpr ring_container& operator=(ring_container &&) noexcept = default;
+  constexpr ring_container(ring_container&&) noexcept = default;
+  constexpr ring_container& operator=(ring_container&&) noexcept = default;
   ~ ring_container() noexcept = default;
-	constexpr void swap(ring_container& other) noexcept {
-		std::array<T, N>::swap(other);
-		std::swap(_M_head, other._M_head);
-		std::swap(_M_tail, other._M_tail);
-	}
+  constexpr void swap(ring_container& other) noexcept
+  {
+    std::array<T, N>::swap(other);
+    std::swap(_M_head, other._M_head);
+    std::swap(_M_tail, other._M_tail);
+  }
 
   COASYNC_ATTRIBUTE((nodiscard, __gnu__::__const__, always_inline)) constexpr const_reference front() const noexcept
   {
@@ -74,30 +75,31 @@ public:
   }
   template <typename U>
   COASYNC_ATTRIBUTE((always_inline)) void push_back(U&& value) noexcept(std::is_nothrow_constructible_v<T, U>)
-	{
-		(void) emplace_back(static_cast<U &&>(value));
-	}
+  {
+    (void) emplace_back(static_cast<U &&>(value));
+  }
   template <typename... CtorArgs>
   COASYNC_ATTRIBUTE((maybe_unused, always_inline)) reference emplace_back(CtorArgs&& ... ctorargs) noexcept(std::is_nothrow_constructible_v<T, CtorArgs ...>)
   {
-  	static_assert(std::is_constructible_v<T, CtorArgs ...>);
-		[[gnu::uninitialized]] T* pointer;
-		pointer = ::new(std::addressof((*this)[_M_tail])) T{ std::forward<CtorArgs>(ctorargs) ...};
+    static_assert(std::is_constructible_v<T, CtorArgs ...>);
+    [[gnu::uninitialized]] T* pointer;
+    pointer = ::new(std::addressof((*this)[_M_tail])) T{ std::forward<CtorArgs>(ctorargs) ...};
     _M_tail = (_M_tail + 1) % N;
     return * pointer;
   }
-  COASYNC_ATTRIBUTE((always_inline)) void pop_front() noexcept
+  COASYNC_ATTRIBUTE((always_inline)) void pop_front() noexcept(std::is_nothrow_destructible_v<T>)
   {
+    std::addressof((*this) [_M_head]) -> ~T();
     _M_head = (_M_head + 1) % N;
   }
   COASYNC_ATTRIBUTE((nodiscard, __gnu__::__const__, always_inline)) constexpr size_type size() const noexcept
-	{
-		return (_M_tail + N - _M_head) % N;
-	}
+  {
+    return (_M_tail + N - _M_head) % N;
+  }
   COASYNC_ATTRIBUTE((nodiscard, __gnu__::__const__, always_inline)) constexpr bool empty() const noexcept
-	{
- 		return _M_tail == _M_head;
-	}
+  {
+    return _M_tail == _M_head;
+  }
 private:
   std::size_t _M_head {};
   std::size_t _M_tail {};
