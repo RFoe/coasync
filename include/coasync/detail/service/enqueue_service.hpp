@@ -1,10 +1,16 @@
 #ifndef COASYNC_ENQUEUE_SERVICE_INCLUDED
 #define COASYNC_ENQUEUE_SERVICE_INCLUDED
+
+#if defined(_MSC_VER) && (_MSC_VER >= 1200)
+# pragma once
+#endif // defined(_MSC_VER) && (_MSC_VER >= 1200)
+
 #include "../awaitable_frame_base.hpp"
 #include "../basic_lockable.hpp"
 #include <forward_list>
 #include <mutex>
 #include <queue>
+
 namespace COASYNC_ATTRIBUTE((gnu::visibility("default"))) coasync
 {
 namespace COASYNC_ATTRIBUTE((gnu::visibility("default"))) detail

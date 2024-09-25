@@ -1,10 +1,16 @@
 #ifndef COASYNC_TIME_SERVICE_INCLUDE
 #define COASYNC_TIME_SERVICE_INCLUDE
+
+#if defined(_MSC_VER) && (_MSC_VER >= 1200)
+# pragma once
+#endif // defined(_MSC_VER) && (_MSC_VER >= 1200)
+
 #include "../awaitable_frame_base.hpp"
 #include "../basic_lockable.hpp"
 #include <queue>
 #include <forward_list>
 #include <mutex>
+
 namespace COASYNC_ATTRIBUTE((gnu::visibility("default"))) coasync
 {
 namespace COASYNC_ATTRIBUTE((gnu::visibility("default"))) detail
