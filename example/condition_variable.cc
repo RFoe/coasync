@@ -11,21 +11,21 @@ using namespace coasync;
 using std::chrono::operator""s;
 
 co_mutex mutex;
-co_condition_variable condition;
+
 std::queue<int> data; /// unprotected raw data
 
-awaitable<void> producer()
+awaitable<void> producer(co_condition_variable& condition)
 {
   co_await mutex.lock();
   std::puts("producer");
   data.emplace(co_await this_coro::id);
   co_await sleep_for(1s);
   mutex.unlock();
-  co_await condition.notify_one();
+  condition.notify_one();
   co_return;
 }
 
-awaitable<void> consumer()
+awaitable<void> consumer(co_condition_variable& condition)
 {
   co_await mutex.lock();
   co_await condition.wait(mutex, [&] { return not data.empty(); });
@@ -39,10 +39,11 @@ awaitable<void> consumer()
 int main()
 {
   execution_context context {8}; /// data race
+  co_condition_variable condition {context};
   for(unsigned int i {}; i < 16; i ++)
-    co_spawn(context, producer(), use_detach);
+    co_spawn(context, producer(condition), use_detach);
   for(unsigned int i {}; i < 16; i ++)
-    co_spawn(context, consumer(), use_detach);
+    co_spawn(context, consumer(condition), use_detach);
 
   context.loop();
   return 0;

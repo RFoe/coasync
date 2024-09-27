@@ -37,6 +37,9 @@ struct [[nodiscard]] basic_co_mutex
 {
   COASYNC_ATTRIBUTE((always_inline)) constexpr explicit basic_co_mutex() noexcept = default;
   basic_co_mutex& operator=(basic_co_mutex const&) = delete;
+  COASYNC_ATTRIBUTE((always_inline)) basic_co_mutex(basic_co_mutex&&) noexcept = default;
+  COASYNC_ATTRIBUTE((always_inline)) basic_co_mutex& operator=(basic_co_mutex&&) noexcept = default;
+  ~ basic_co_mutex() noexcept = default;
   COASYNC_ATTRIBUTE((nodiscard, always_inline)) bool try_lock() const noexcept
   {
     return not _M_locked.exchange(true, std::memory_order_acquire);
@@ -57,13 +60,14 @@ struct [[nodiscard]] basic_co_mutex
   {
     _M_locked.store(false, std::memory_order_release);
   }
-	COASYNC_ATTRIBUTE((nodiscard, always_inline)) bool owns_lock() const noexcept {
-		return _M_locked.load(std::memory_order_acquire);
-	}
+  COASYNC_ATTRIBUTE((nodiscard, always_inline)) bool owns_lock() const noexcept
+  {
+    return _M_locked.load(std::memory_order_acquire);
+  }
   COASYNC_ATTRIBUTE((nodiscard)) awaitable<std::unique_lock<basic_co_mutex const>> scoped() const noexcept
   {
     co_await this->lock();
-		co_return std::unique_lock(* this, std::adopt_lock);
+    co_return std::unique_lock(* this, std::adopt_lock);
   }
 private:
   mutable std::atomic_bool 				_M_locked {false};
