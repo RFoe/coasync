@@ -32,6 +32,15 @@ using std::experimental::suspend_never;
 namespace COASYNC_ATTRIBUTE((gnu::visibility("default"))) coasync
 {
 struct execution_context;
+
+/// Contrary to popular belief, it is ok and often preferred to use the ordinary
+/// Mutex from the standard library in asynchronous code.
+
+/// The feature that the async mutex offers over the blocking mutex is the ability
+/// to keep it locked across an .await point. This makes the async mutex more
+/// expensive than the blocking mutex, so the blocking mutex should be preferred
+/// in the cases where it can be used.
+
 template <typename execution_context>
 struct [[nodiscard]] basic_co_mutex
 {
@@ -51,6 +60,8 @@ struct [[nodiscard]] basic_co_mutex
       while(_M_locked.load(std::memory_order_relaxed))
         if(cnt -- <= 0) COASYNC_ATTRIBUTE((unlikely))
           {
+/// The locking mechanism uses eventual fairness to ensure locking
+/// will be fair on average without sacrificing performance.
             co_await detail::suspendible<detail::yield_service>()();
             cnt = _S_count;
           }
@@ -64,6 +75,8 @@ struct [[nodiscard]] basic_co_mutex
   {
     return _M_locked.load(std::memory_order_acquire);
   }
+  /// An RAII implementation of a ¡°scoped lock¡± of a mutex.
+	/// When this structure is dropped (falls out of scope), the lock will be unlocked.
   COASYNC_ATTRIBUTE((nodiscard)) awaitable<std::unique_lock<basic_co_mutex const>> scoped() const noexcept
   {
     co_await this->lock();
