@@ -11,6 +11,10 @@
 namespace COASYNC_ATTRIBUTE((gnu::visibility("default"))) coasync
 {
 struct execution_context;
+/// a downward counter of type std::ptrdiff_t which can be used to synchronize coroutines.
+/// The value of the counter is initialized on creation. Threads may block on the latch
+/// until the counter is decremented to zero. There is no possibility to increase or reset
+/// the counter, which makes the latch a single-use barrier.
 template <typename execution_context>
 struct [[nodiscard]] basic_co_latch
 {
@@ -22,7 +26,7 @@ struct [[nodiscard]] basic_co_latch
   COASYNC_ATTRIBUTE((always_inline)) basic_co_latch(basic_co_latch&&) noexcept = default;
   COASYNC_ATTRIBUTE((always_inline)) basic_co_latch& operator=(basic_co_latch&&) noexcept = default;
   ~ basic_co_latch() noexcept = default;
-  COASYNC_ATTRIBUTE((nodiscard)) awaitable<void> count_down(std::ptrdiff_t update = 1) noexcept
+  COASYNC_ATTRIBUTE((nodiscard)) awaitable<void> COASYNC_API count_down(std::ptrdiff_t update = 1) noexcept
   {
     auto __l  = co_await _M_mutex.scoped();
     COASYNC_ASSERT((_M_count >= update));
@@ -30,12 +34,13 @@ struct [[nodiscard]] basic_co_latch
     if(_M_count == 0) COASYNC_ATTRIBUTE((unlikely))
       _M_condition.notify_all();
   }
-  COASYNC_ATTRIBUTE((nodiscard)) awaitable<bool> try_wait() noexcept
+  COASYNC_ATTRIBUTE((nodiscard)) awaitable<bool> COASYNC_API try_wait() noexcept
   {
     auto __l  = co_await _M_mutex.scoped();
     co_return (_M_count == 0);
   }
-  COASYNC_ATTRIBUTE((nodiscard)) awaitable<void> wait() noexcept
+  /// enables multiple tasks to synchronize the beginning of some computation.
+  COASYNC_ATTRIBUTE((nodiscard)) awaitable<void> COASYNC_API wait() noexcept
   {
     auto __l  = co_await _M_mutex.scoped();
     co_await _M_condition.wait(_M_mutex, [this]
@@ -47,7 +52,7 @@ struct [[nodiscard]] basic_co_latch
       return (_M_count == 0);
     });
   }
-  COASYNC_ATTRIBUTE((nodiscard)) awaitable<void> arrive_and_wait(std::ptrdiff_t update = 1) noexcept
+  COASYNC_ATTRIBUTE((nodiscard)) awaitable<void> COASYNC_API arrive_and_wait(std::ptrdiff_t update = 1) noexcept
   {
     co_await count_down(update);
     co_await wait();

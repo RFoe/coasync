@@ -13,6 +13,9 @@
 namespace COASYNC_ATTRIBUTE((gnu::visibility("default"))) coasync
 {
 struct execution_context;
+///a lightweight synchronization primitive that can control access to a shared resource.
+/// Unlike a basic_co_mutex, a counting_semaphore allows more than one concurrent access
+/// to the same resource, for at least LeastMaxValue concurrent accessors.
 template <std::ptrdiff_t least_max_value, typename execution_context>
 struct [[nodiscard]] basic_co_counting_semaphore
 {
@@ -25,11 +28,11 @@ struct [[nodiscard]] basic_co_counting_semaphore
   COASYNC_ATTRIBUTE((always_inline)) basic_co_counting_semaphore(basic_co_counting_semaphore&&) noexcept = default;
   COASYNC_ATTRIBUTE((always_inline)) basic_co_counting_semaphore& operator=(basic_co_counting_semaphore&&) noexcept = default;
   ~ basic_co_counting_semaphore() noexcept = default;
-  COASYNC_ATTRIBUTE((nodiscard, always_inline)) static constexpr max() noexcept
+  COASYNC_ATTRIBUTE((nodiscard, always_inline)) static constexpr COASYNC_API max() noexcept
   {
     return least_max_value;
   }
-  COASYNC_ATTRIBUTE((nodiscard)) awaitable<void> acquire() noexcept
+  COASYNC_ATTRIBUTE((nodiscard)) awaitable<void> COASYNC_API acquire() noexcept
   {
     auto __l = co_await _M_mutex.scoped();
     co_await _M_condition.wait(_M_mutex, [this]
@@ -42,7 +45,7 @@ struct [[nodiscard]] basic_co_counting_semaphore
     });
     -- _M_count;
   }
-  COASYNC_ATTRIBUTE((nodiscard)) awaitable<void> release(std::ptrdiff_t update = 1) noexcept
+  COASYNC_ATTRIBUTE((nodiscard)) awaitable<void> COASYNC_API release(std::ptrdiff_t update = 1) noexcept
   {
     COASYNC_ASSERT((update <= max() and update != 0));
     auto __l = co_await _M_mutex.scoped();
@@ -54,7 +57,7 @@ struct [[nodiscard]] basic_co_counting_semaphore
 			_M_condition.notify_one();
 		co_return;
   }
-  COASYNC_ATTRIBUTE((nodiscard)) awaitable<bool> try_release() noexcept
+  COASYNC_ATTRIBUTE((nodiscard)) awaitable<bool> COASYNC_API try_release() noexcept
   {
 		auto __l = co_await _M_mutex.scoped();
 		if(_M_count != 0) COASYNC_ATTRIBUTE((unlikely)) {

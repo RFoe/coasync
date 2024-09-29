@@ -53,7 +53,7 @@ struct [[nodiscard]] basic_co_mutex
   {
     return not _M_locked.exchange(true, std::memory_order_acquire);
   }
-  COASYNC_ATTRIBUTE((nodiscard)) awaitable<void> lock() const noexcept
+  COASYNC_ATTRIBUTE((nodiscard)) awaitable<void> COASYNC_API lock() const noexcept
   {
     std::intptr_t cnt = _S_count;
     while(not try_lock())
@@ -67,17 +67,17 @@ struct [[nodiscard]] basic_co_mutex
           }
     co_return;
   }
-  COASYNC_ATTRIBUTE((always_inline)) void unlock() const noexcept
+  COASYNC_ATTRIBUTE((always_inline)) void COASYNC_API unlock() const noexcept
   {
     _M_locked.store(false, std::memory_order_release);
   }
-  COASYNC_ATTRIBUTE((nodiscard, always_inline)) bool owns_lock() const noexcept
+  COASYNC_ATTRIBUTE((nodiscard, always_inline)) bool COASYNC_API owns_lock() const noexcept
   {
     return _M_locked.load(std::memory_order_acquire);
   }
   /// An RAII implementation of a ¡°scoped lock¡± of a mutex.
 	/// When this structure is dropped (falls out of scope), the lock will be unlocked.
-  COASYNC_ATTRIBUTE((nodiscard)) awaitable<std::unique_lock<basic_co_mutex const>> scoped() const noexcept
+  COASYNC_ATTRIBUTE((nodiscard)) awaitable<std::unique_lock<basic_co_mutex const>> COASYNC_API scoped() const noexcept
   {
     co_await this->lock();
     co_return std::unique_lock(* this, std::adopt_lock);

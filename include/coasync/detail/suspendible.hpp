@@ -26,10 +26,13 @@ struct suspendible
   {
     std::coroutine_handle<awaitable_frame_base> frame = co_await get_frame();
     service_type& service = use_service<service_type>(co_await get_context());
-    service.post_frame(frame, std::forward<Overlaps>(overlaps) ...);
+		////////// TODO: assign context object reference
+		service.post_frame(frame, std::forward<Overlaps>(overlaps) ...);
     co_await std::suspend_always();
     detail::__spin_loop_pause();
   }
+private:
+	////// execution_context& _M_context;
 };
 }
 }
