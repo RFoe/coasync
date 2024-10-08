@@ -18,11 +18,12 @@ struct awaitable_frame final
   : public awaitable_frame_base
   , public awaitable_frame_alloc<Alloc>
 {
-  COASYNC_ATTRIBUTE((noreturn))
-	static std::coroutine_handle<awaitable_frame> get_return_object_on_allocation_failure()
-  {
-    throw std::bad_alloc(); // or, return Coroutine(nullptr);
-  }
+//  nothrow?: awaitable_frame_alloc<Alloc>::operator new
+//  COASYNC_ATTRIBUTE((noreturn))
+//	static std::coroutine_handle<awaitable_frame> get_return_object_on_allocation_failure()
+//  {
+//    throw std::bad_alloc(); // or, return Coroutine(nullptr);
+//  }
   std::coroutine_handle<awaitable_frame> get_return_object() noexcept
   {
     return std::coroutine_handle<awaitable_frame>::from_promise(*this);

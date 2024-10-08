@@ -5,6 +5,13 @@
 # pragma once
 #endif // defined(_MSC_VER) && (_MSC_VER >= 1200)
 
+#include "coasync/co_spawn.hpp"
+#include "coasync/co_bind.hpp"
+#include "coasync/co_signal.hpp"
+#include "coasync/co_mutex.hpp"
+#include "coasync/co_condition_variable.hpp"
+#include "coasync/co_latch.hpp"
+#include "coasync/co_semaphore.hpp"
 #include "coasync/async_fn.hpp"
 #include "coasync/awaitable.hpp"
 #include "coasync/channel.hpp"
