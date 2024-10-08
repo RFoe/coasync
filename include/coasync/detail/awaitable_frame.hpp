@@ -18,6 +18,11 @@ struct awaitable_frame final
   : public awaitable_frame_base
   , public awaitable_frame_alloc<Alloc>
 {
+  COASYNC_ATTRIBUTE((noreturn))
+	static std::coroutine_handle<awaitable_frame> get_return_object_on_allocation_failure()
+  {
+    throw std::bad_alloc(); // or, return Coroutine(nullptr);
+  }
   std::coroutine_handle<awaitable_frame> get_return_object() noexcept
   {
     return std::coroutine_handle<awaitable_frame>::from_promise(*this);
@@ -67,9 +72,10 @@ struct awaitable_frame<void, Alloc> final
 
 template <typename> struct awaitable_frame_traits: std::false_type {};
 template <typename Ref, typename Alloc>
-struct awaitable_frame_traits<awaitable_frame<Ref, Alloc>>: std::true_type {
-	typedef Ref 	value_type;
-	typedef Alloc allocator_type;
+struct awaitable_frame_traits<awaitable_frame<Ref, Alloc>>: std::true_type
+{
+  typedef Ref 	value_type;
+  typedef Alloc allocator_type;
 };
 
 }
