@@ -38,26 +38,26 @@ struct awaitable final
 /// 			functions using moving assignment/construction.
 ///    as the element type in move-aware containers, such as std::vector, which
 /// 			hold coroutine_handle to dynamically/statically-allocated coroutine promise
-  awaitable(awaitable&& other)
+  COASYNC_ATTRIBUTE((always_inline)) awaitable(awaitable&& other)
   noexcept: _M_coroutine(std::exchange(other._M_coroutine, nullptr))
   {
   }
   /// Constructs a awaitable by transferring ownership from other to *this and
   /// stores the null coroutine in other.
-  awaitable& operator=(awaitable&& other) noexcept
+  COASYNC_ATTRIBUTE((always_inline)) awaitable& operator=(awaitable&& other) noexcept
   {
     if (&other != this)
       _M_coroutine = std::exchange(other._M_coroutine, nullptr);
     return (*this);
   }
-  ~ awaitable()
+  COASYNC_ATTRIBUTE((always_inline)) ~ awaitable()
   {
-    if (not _M_coroutine)
+    if (not _M_coroutine) COASYNC_ATTRIBUTE((unlikely))
       return;
     _M_coroutine.destroy();
   }
   constexpr awaitable& operator=(awaitable const&) = delete;
-  void swap(awaitable& other) noexcept
+  COASYNC_ATTRIBUTE((always_inline)) void swap(awaitable& other) noexcept
   {
     std::swap(_M_coroutine, other._M_coroutine);
   }
@@ -85,11 +85,12 @@ struct awaitable final
     }
     std::coroutine_handle<detail::awaitable_frame<Ref, Alloc>> _M_coroutine;
   };
-  await_result operator co_await() const noexcept
+  COASYNC_ATTRIBUTE((nodiscard)) await_result operator co_await() const noexcept
   {
+    COASYNC_ASSERT(_M_coroutine != nullptr && !_M_coroutine.done());
     return await_result { _M_coroutine };
   }
-  awaitable(std::coroutine_handle<detail::awaitable_frame<Ref, Alloc>> coroutine) noexcept
+  COASYNC_ATTRIBUTE((always_inline)) awaitable(std::coroutine_handle<detail::awaitable_frame<Ref, Alloc>> coroutine) noexcept
     : _M_coroutine(coroutine)
   {
   }
@@ -100,8 +101,8 @@ struct awaitable final
     return _M_coroutine;
   }
   /// Releases the ownership of the managed coroutine promise, if any.
-	/// get_coroutine() returns nullptr after the call.
-	/// The caller is responsible for destroy the coroutine
+  /// get_coroutine() returns nullptr after the call.
+  /// The caller is responsible for destroy the coroutine
   COASYNC_ATTRIBUTE((nodiscard, always_inline))
   std::coroutine_handle<detail::awaitable_frame<Ref, Alloc>>
       COASYNC_API release_coroutine() noexcept
@@ -113,9 +114,10 @@ private:
 };
 template <typename> struct awaitable_traits: std::false_type {};
 template <typename Ref, typename Alloc>
-struct awaitable_traits<awaitable<Ref, Alloc>>: std::true_type {
-	typedef Ref 	value_type;
-	typedef Alloc allocator_type;
+struct awaitable_traits<awaitable<Ref, Alloc>>: std::true_type
+{
+  typedef Ref 	value_type;
+  typedef Alloc allocator_type;
 };
 }
 namespace COASYNC_ATTRIBUTE((gnu::visibility("default"))) std

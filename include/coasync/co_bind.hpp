@@ -20,7 +20,11 @@ awaitable<std::invoke_result_t<Fn, Args ...>>
   using invoke_result_t = std::invoke_result_t<Fn, Args ...>;
   std::packaged_task<invoke_result_t()> 	packaged_task {std::bind(std::forward<Fn>(fn), std::forward<Args>(args) ...)};
   std::future<invoke_result_t> 						future = packaged_task.get_future();
-  co_spawn(context, [](std::packaged_task<invoke_result_t()> packaged_task) -> awaitable<void>
+  co_spawn(context, []
+#if __cplusplus >= 202207L
+           COASYNC_ATTRIBUTE((nodiscard))
+#endif
+           (std::packaged_task<invoke_result_t()> packaged_task) -> awaitable<void>
   {
     co_return (void)packaged_task();
   }(std::move(packaged_task)), use_detach);
