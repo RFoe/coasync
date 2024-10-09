@@ -16,7 +16,7 @@ namespace COASYNC_ATTRIBUTE((gnu::visibility("default"))) detail
 template <std::size_t asynchronous_tag>
 struct [[nodiscard]] signal_condition
 {
-  alignas(64) static inline std::atomic_flag _S_flag {};
+  alignas(64) static inline /* volatile */ std::atomic_flag _S_flag {};
   static COASYNC_ATTRIBUTE((always_inline)) void _S_set([[maybe_unused]] int signum) noexcept
   {
     COASYNC_ASSERT(signum == asynchronous_tag);

@@ -31,6 +31,120 @@
 #  include <ciso646> // For stdlib feature-test macros when <version> is not available
 #endif
 
+#if __has_include(<ranges>) && defined(__cpp_lib_ranges)
+#include <ranges>
+#else
+
+// Placeholder implementation of the bits we need from <ranges> header
+// when we don't have the <ranges> header (e.g. Clang 12 and earlier).
+namespace std {
+
+// Don't create naming conflicts with recent libc++ which defines std::iter_reference_t
+// in <iterator> but doesn't yet provide a <ranges> header.
+template <typename _T>
+using __iter_reference_t = decltype(*std::declval<_T&>());
+
+template <typename _T>
+using iter_value_t =
+    typename std::iterator_traits<std::remove_cvref_t<_T>>::value_type;
+
+namespace ranges {
+
+namespace __begin {
+void begin();
+
+struct _fn {
+    template <typename _Range>
+    requires requires(_Range& __r) {
+        __r.begin();
+    }
+    auto operator()(_Range&& __r) const
+        noexcept(noexcept(__r.begin()))
+        -> decltype(__r.begin()) {
+        return __r.begin();
+    }
+
+    template <typename _Range>
+    requires
+        (!requires(_Range& __r) { __r.begin(); }) &&
+        requires(_Range& __r) { begin(__r); }
+    auto operator()(_Range&& __r) const
+        noexcept(noexcept(begin(__r)))
+        -> decltype(begin(__r)) {
+        return begin(__r);
+    }
+};
+
+} // namespace __begin
+
+inline namespace __begin_cpo {
+inline constexpr __begin::_fn begin = {};
+}
+
+namespace __end {
+void end();
+
+struct _fn {
+    template <typename _Range>
+    requires requires(_Range& __r) { __r.end(); }
+    auto operator()(_Range&& __r) const
+        noexcept(noexcept(__r.end()))
+        -> decltype(__r.end()) {
+        return __r.end();
+    }
+
+    template <typename _Range>
+    requires
+        (!requires(_Range& __r) { __r.end(); }) &&
+        requires(_Range& __r) { end(__r); }
+    auto operator()(_Range&& __r) const
+        noexcept(noexcept(end(__r)))
+        -> decltype(end(__r)) {
+        return end(__r);
+    }
+};
+} // namespace __end
+
+inline namespace _end_cpo {
+inline constexpr __end::_fn end = {};
+}
+
+template <typename _Range>
+using iterator_t = decltype(begin(std::declval<_Range>()));
+
+template <typename _Range>
+using sentinel_t = decltype(end(std::declval<_Range>()));
+
+template <typename _Range>
+using range_reference_t = __iter_reference_t<iterator_t<_Range>>;
+
+template <typename _Range>
+using range_value_t = iter_value_t<iterator_t<_Range>>;
+
+template <typename _T>
+concept range = requires(_T& __t) {
+    ranges::begin(__t);
+    ranges::end(__t);
+};
+
+} // namespace ranges
+} // namespace std
+#endif
+
+#if __has_include(<coroutine>) && defined(__cpp_lib_coroutine)
+#include <coroutine>
+#else
+// Fallback for older experimental implementations of coroutines.
+#include <experimental/coroutine>
+namespace std {
+using std::experimental::coroutine_handle;
+using std::experimental::coroutine_traits;
+using std::experimental::noop_coroutine;
+using std::experimental::suspend_always;
+using std::experimental::suspend_never;
+} // namespace std
+#endif
+
 #include <cassert>
 #include <type_traits>
 #include <exception>
