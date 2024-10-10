@@ -54,8 +54,8 @@ struct __basic_acceptor: public __basic_socket<Protocol, execution_context>
   COASYNC_ATTRIBUTE((nodiscard))
   awaitable<__basic_socket<protocol_type, context_type>> COASYNC_API accept()
   {
-    assert(&context() == &(co_await detail::get_context()));
-    co_await detail::suspendible<detail::socketin_service>()(native_handle());
+//    assert(&context() == &(co_await detail::get_context()));
+    co_await detail::related_suspendible<detail::socketin_service>(context())(native_handle());
     socket_option::error err;
     get_option(err);
     if (int ec = err.get()) COASYNC_ATTRIBUTE((unlikely))

@@ -30,7 +30,7 @@ awaitable<void> test()
 }
 int main()
 {
-  execution_context context{3};
+  execution_context context{concurrency_arg(3)};
   /// Initiate three child threads
   co_spawn(context, test(), use_detach);
   context.loop();

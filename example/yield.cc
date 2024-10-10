@@ -19,7 +19,7 @@ awaitable<void> B() noexcept {
 }
 
 int main() {
-	execution_context context{0};
+	execution_context context{concurrency_arg(0)};
 	co_spawn(context, A(), use_detach);
 	co_spawn(context, B(), use_detach);
 	context.loop();

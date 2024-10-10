@@ -51,7 +51,8 @@ private:
       return (* std::any_cast<F>(__any))(std::forward<Args>(__args)...);
     }
   };
-  COASYNC_ATTRIBUTE((noreturn, always_inline)) static awaitable<R> _S_empty(std::any* __any, Args ...__args) noexcept
+  COASYNC_ATTRIBUTE((noreturn, always_inline))
+	static awaitable<R> _S_empty(COASYNC_ATTRIBUTE((maybe_unused)) std::any* __any, COASYNC_ATTRIBUTE((maybe_unused)) Args ...__args) noexcept
   {
     COASYNC_TERMINATE();
   }

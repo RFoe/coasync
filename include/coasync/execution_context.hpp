@@ -13,11 +13,14 @@
 
 namespace COASYNC_ATTRIBUTE((gnu::visibility("default"))) coasync
 {
+enum class COASYNC_ATTRIBUTE((nodiscard)) concurrency_arg
+  : unsigned int {};
 struct execution_context
 {
-  explicit execution_context(unsigned int concurrency = std::thread::hardware_concurrency()) noexcept
-    :_M_executor(concurrency), _M_lifetime(static_cast<bool>(concurrency)) {}
-  ~ execution_context()
+  COASYNC_ATTRIBUTE((always_inline))
+	explicit execution_context(concurrency_arg conc = concurrency_arg(std::thread::hardware_concurrency())) noexcept
+    :_M_executor((unsigned int)(conc)), _M_lifetime(static_cast<bool>((unsigned int)(conc) == 0)) {}
+  COASYNC_ATTRIBUTE((always_inline))~ execution_context() noexcept
   {
     erase_after(&_M_registry, *this);
   }
@@ -55,7 +58,7 @@ struct execution_context
   }
   template <typename Ref, typename Alloc>
   COASYNC_ATTRIBUTE((always_inline))
-  void COASYNC_API  push_frame_to_lifetime(std::coroutine_handle<detail::awaitable_frame<Ref, Alloc>> frame)
+  void COASYNC_API push_frame_to_lifetime(std::coroutine_handle<detail::awaitable_frame<Ref, Alloc>> frame)
   {
     /// Associate the coroutine object with this context
     frame.promise().set_context(this);

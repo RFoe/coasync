@@ -18,7 +18,7 @@ awaitable<void> test() noexcept
 
 int main()
 {
-  execution_context ctx;
+  execution_context ctx {concurrency_arg(0)};
   co_spawn(ctx, test(), use_detach);
   ctx.loop();
 }

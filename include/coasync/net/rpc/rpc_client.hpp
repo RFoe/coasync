@@ -20,7 +20,7 @@ private:
   typedef __basic_socket<tcp, execution_context> 	socket;
 public:
   COASYNC_ATTRIBUTE((always_inline))
-  explicit __rpc_client(socket s): _M_stream(std::move(s)) {}
+  constexpr explicit __rpc_client(socket s) noexcept: _M_stream(std::move(s)) {}
   template <typename R, typename... Args>
   COASYNC_ATTRIBUTE((nodiscard))
   awaitable<R> call(std::string const& __fn, Args&& ... __args)
@@ -33,7 +33,6 @@ public:
       R _M_value;
     } __storage;
 		co_await _M_stream.deserialize((R &)__storage._M_value);
-		std::puts("get result");
 		co_return std::move(__storage._M_value);
   }
 private:

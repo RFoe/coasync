@@ -21,7 +21,7 @@ awaitable<void> serial()
 }
 int main()
 {
-  execution_context context {2};
+  execution_context context {concurrency_arg(2)};
   co_spawn(context, serial(), use_detach);
   context.loop();
 }

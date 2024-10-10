@@ -68,7 +68,7 @@ struct [[nodiscard]] basic_co_condition_variable
         co_await mutex.lock();
       }
     /// Right after wait returns, lock.owns_lock() is true, and lock.mutex() is
-		/// locked by the calling thread. If these
+    /// locked by the calling thread. If these
     if(not std::forward<Predicate>(pred).operator()()) COASYNC_ATTRIBUTE((unlikely))
       COASYNC_TERMINATE();
   }
@@ -89,10 +89,10 @@ struct [[nodiscard]] basic_co_condition_variable
     std::this_thread::yield();
   }
   /// The notifying coroutine does not need to hold the lock on the same mutex as the
-	/// one held by the waiting thread(s). Doing so may be a pessimization, since
-	/// the notified coroutine would immediately block again, waiting for the notifying
-	/// coroutine to release the lock, though some implementations recognize the pattern
-	/// and do not attempt to wake up the thread that is notified under lock.
+  /// one held by the waiting thread(s). Doing so may be a pessimization, since
+  /// the notified coroutine would immediately block again, waiting for the notifying
+  /// coroutine to release the lock, though some implementations recognize the pattern
+  /// and do not attempt to wake up the thread that is notified under lock.
   COASYNC_ATTRIBUTE((always_inline)) void COASYNC_API notify_one() const noexcept
   {
     COASYNC_ATTRIBUTE((maybe_unused)) std::unique_lock<detail::basic_lockable>
@@ -108,6 +108,10 @@ struct [[nodiscard]] basic_co_condition_variable
     if(alternative_lock.owns_lock()) COASYNC_ATTRIBUTE((likely))
       alternative_lock.unlock();
     std::this_thread::yield();
+  }
+  COASYNC_ATTRIBUTE((nodiscard, always_inline)) execution_context& context() noexcept
+  {
+    return _M_context;
   }
 private:
   COASYNC_ATTRIBUTE((no_unique_address)) execution_context& 							_M_context;

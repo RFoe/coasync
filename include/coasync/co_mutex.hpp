@@ -44,11 +44,15 @@ struct execution_context;
 template <typename execution_context>
 struct [[nodiscard]] basic_co_mutex
 {
-  COASYNC_ATTRIBUTE((always_inline)) constexpr explicit basic_co_mutex() noexcept = default;
-  basic_co_mutex& operator=(basic_co_mutex const&) = delete;
+  COASYNC_ATTRIBUTE((always_inline))
+  constexpr explicit basic_co_mutex(execution_context& context) noexcept
+    : _M_context(context) {}
+  constexpr basic_co_mutex& operator=(basic_co_mutex const&) = delete;
+  constexpr basic_co_mutex(basic_co_mutex const&) = delete;
   COASYNC_ATTRIBUTE((always_inline)) basic_co_mutex(basic_co_mutex&&) noexcept = default;
   COASYNC_ATTRIBUTE((always_inline)) basic_co_mutex& operator=(basic_co_mutex&&) noexcept = default;
-  ~ basic_co_mutex() noexcept = default;
+  COASYNC_ATTRIBUTE((always_inline)) ~ basic_co_mutex() noexcept = default;
+
   COASYNC_ATTRIBUTE((nodiscard, always_inline)) bool try_lock() const noexcept
   {
     return not _M_locked.exchange(true, std::memory_order_acquire);
@@ -62,7 +66,7 @@ struct [[nodiscard]] basic_co_mutex
           {
 /// The locking mechanism uses eventual fairness to ensure locking
 /// will be fair on average without sacrificing performance.
-            co_await detail::suspendible<detail::yield_service>()();
+            co_await detail::related_suspendible<detail::yield_service>(_M_context)();
             cnt = _S_count;
           }
     co_return;
@@ -76,13 +80,19 @@ struct [[nodiscard]] basic_co_mutex
     return _M_locked.load(std::memory_order_acquire);
   }
   /// An RAII implementation of a ¡°scoped lock¡± of a mutex.
-	/// When this structure is dropped (falls out of scope), the lock will be unlocked.
-  COASYNC_ATTRIBUTE((nodiscard)) awaitable<std::unique_lock<basic_co_mutex const>> COASYNC_API scoped() const noexcept
+  /// When this structure is dropped (falls out of scope), the lock will be unlocked.
+  COASYNC_ATTRIBUTE((nodiscard))
+  awaitable<std::unique_lock<basic_co_mutex const>> COASYNC_API scoped() const noexcept
   {
     co_await this->lock();
     co_return std::unique_lock(* this, std::adopt_lock);
   }
+  COASYNC_ATTRIBUTE((nodiscard, always_inline)) execution_context& context() noexcept
+  {
+    return _M_context;
+  }
 private:
+  COASYNC_ATTRIBUTE((no_unique_address)) execution_context& _M_context;
   mutable std::atomic_bool 				_M_locked {false};
   static constexpr std::intptr_t const _S_count = 1024;
 };

@@ -1,8 +1,8 @@
-#include "../include/coasync/execution_context.hpp"
-#include "../include/coasync/net/protocol.hpp"
-#include "../include/coasync/net/resolver.hpp"
-#include "../include/coasync/net/endpoint.hpp"
-#include "../include/coasync/this_coro.hpp"
+#include "../../include/coasync/execution_context.hpp"
+#include "../../include/coasync/net/protocol.hpp"
+#include "../../include/coasync/net/resolver.hpp"
+#include "../../include/coasync/net/endpoint.hpp"
+#include "../../include/coasync/this_coro.hpp"
 #include <iostream>
 using namespace coasync;
 
@@ -17,7 +17,7 @@ awaitable<void> test() noexcept {
 }
 
 int main() {
- execution_context context;
+ execution_context context{concurrency_arg(0)};
  co_spawn(context, test(), use_detach);
  context.loop();
 	

@@ -37,7 +37,6 @@ private:
 };
 template <typename Class, typename T>
 member_field(T Class::*, char const*) -> member_field<T Class::*>;
-template <typename Class> struct meta: std::false_type {};
 }
 }
 /// provides us the meta info of the object via meta-object types.
@@ -58,9 +57,15 @@ template <typename Class> struct meta: std::false_type {};
 #define _COASYNC_ARGS_ENWRAP_INTERNAL(_S, _N, ...) COASYNC_CONCAT(_COASYNC_ARGS_ENWRAP_, _N)(_S, __VA_ARGS__)
 
 #include <tuple>
-
+namespace COASYNC_ATTRIBUTE((gnu::visibility("default"))) coasync
+{
+namespace COASYNC_ATTRIBUTE((gnu::visibility("default"))) detail
+{
+template <typename> struct meta: std::false_type {};
+}
+}
 #define struct_meta(_S, ...) \
-template <> struct coasync::detail::meta<_S> { \
+template <> struct coasync::detail::meta<_S>: std::true_type { \
 	static constexpr auto fields = std::make_tuple(COASYNC_ARGS_ENWRAP(_S, __VA_ARGS__)); \
 };
 

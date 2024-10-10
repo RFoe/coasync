@@ -8,10 +8,10 @@
 using namespace coasync;
 using std::chrono::operator""s;
 
-co_mutex mutex;
+
 int data; /// unprotected raw data
 
-awaitable<void> access() noexcept
+awaitable<void> access(co_mutex& mutex) noexcept
 {
   std::puts("access");
   auto _l = co_await mutex.scoped();
@@ -24,9 +24,10 @@ awaitable<void> access() noexcept
 }
 int main()
 {
-  execution_context context {8}; /// data race
+  execution_context context {concurrency_arg(8)}; /// data race
+  co_mutex mutex{context};
   for(unsigned int i {}; i < 16; i ++)
-    co_spawn(context, access(), use_detach);
+    co_spawn(context, access(mutex), use_detach);
   context.loop();
   return 0;
 }

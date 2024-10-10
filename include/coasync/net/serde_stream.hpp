@@ -27,11 +27,11 @@ struct __serde_stream: detail::serde_stream_base<__serde_stream<execution_contex
   using detail::serde_stream_base<__serde_stream>::deserialize;
 
 	COASYNC_ATTRIBUTE((always_inline))
-	constexpr __serde_stream(__basic_socket<tcp, execution_context> socket) noexcept
+	constexpr explicit __serde_stream(__basic_socket<tcp, execution_context> socket) noexcept
     : _M_socket(std::move(socket)) {}
 
 	COASYNC_ATTRIBUTE((nodiscard))
-  awaitable<void> read(char_type* s, std::streamsize count)
+  awaitable<void> read(char_type* s, std::streamsize count) COASYNC_ATTRIBUTE((gnu::nonnull))
   {
   	/// If there are not enough bytes of data in the current buffer, more data
 		/// needs to be read from the socket.

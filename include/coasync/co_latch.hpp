@@ -20,12 +20,15 @@ struct [[nodiscard]] basic_co_latch
 {
   COASYNC_ATTRIBUTE((always_inline))
   constexpr explicit basic_co_latch(execution_context& context, std::ptrdiff_t count) noexcept
-    : _M_condition(context)
+    : _M_mutex(context)
+    , _M_condition(context)
     , _M_count(count) {};
-  basic_co_latch& operator=(basic_co_latch const&) = delete;
+  constexpr basic_co_latch& operator=(basic_co_latch const&) = delete;
+  constexpr basic_co_latch(basic_co_latch const&) = delete;
   COASYNC_ATTRIBUTE((always_inline)) basic_co_latch(basic_co_latch&&) noexcept = default;
   COASYNC_ATTRIBUTE((always_inline)) basic_co_latch& operator=(basic_co_latch&&) noexcept = default;
-  ~ basic_co_latch() noexcept = default;
+  COASYNC_ATTRIBUTE((always_inline)) ~ basic_co_latch() noexcept = default;
+
   COASYNC_ATTRIBUTE((nodiscard)) awaitable<void> COASYNC_API count_down(std::ptrdiff_t update = 1) noexcept
   {
     auto __l  = co_await _M_mutex.scoped();
@@ -56,6 +59,10 @@ struct [[nodiscard]] basic_co_latch
   {
     co_await count_down(update);
     co_await wait();
+  }
+  COASYNC_ATTRIBUTE((nodiscard, always_inline)) execution_context& context() noexcept
+  {
+    return _M_mutex.context();
   }
 private:
   mutable co_mutex 							_M_mutex;

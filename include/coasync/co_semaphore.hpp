@@ -19,15 +19,20 @@ struct execution_context;
 template <std::ptrdiff_t least_max_value, typename execution_context>
 struct [[nodiscard]] basic_co_counting_semaphore
 {
+private:
   static_assert(least_max_value <= std::numeric_limits<std::uint32_t>::max());
+public:
   COASYNC_ATTRIBUTE((always_inline))
   constexpr explicit basic_co_counting_semaphore(execution_context& context, std::ptrdiff_t desired) noexcept
-    : _M_condition(context)
+    : _M_mutex(context)
+    , _M_condition(context)
     , _M_count(desired) {};
-  basic_co_counting_semaphore& operator=(basic_co_counting_semaphore const&) = delete;
+  constexpr basic_co_counting_semaphore& operator=(basic_co_counting_semaphore const&) = delete;
+  constexpr basic_co_counting_semaphore(basic_co_counting_semaphore const&) = delete;
   COASYNC_ATTRIBUTE((always_inline)) basic_co_counting_semaphore(basic_co_counting_semaphore&&) noexcept = default;
   COASYNC_ATTRIBUTE((always_inline)) basic_co_counting_semaphore& operator=(basic_co_counting_semaphore&&) noexcept = default;
-  ~ basic_co_counting_semaphore() noexcept = default;
+  COASYNC_ATTRIBUTE((always_inline)) ~ basic_co_counting_semaphore() noexcept = default;
+
   COASYNC_ATTRIBUTE((nodiscard, always_inline)) static constexpr COASYNC_API max() noexcept
   {
     return least_max_value;
@@ -52,20 +57,25 @@ struct [[nodiscard]] basic_co_counting_semaphore
     COASYNC_ASSERT((_M_count <= max() - update));
     _M_count += update;
     if(update > 1) COASYNC_ATTRIBUTE((likely))
-			_M_condition.notify_all();
-		else COASYNC_ATTRIBUTE((unlikely))
-			_M_condition.notify_one();
-		co_return;
+      _M_condition.notify_all();
+    else COASYNC_ATTRIBUTE((unlikely))
+      _M_condition.notify_one();
+    co_return;
   }
   COASYNC_ATTRIBUTE((nodiscard)) awaitable<bool> COASYNC_API try_release() noexcept
   {
-		auto __l = co_await _M_mutex.scoped();
-		if(_M_count != 0) COASYNC_ATTRIBUTE((unlikely)) {
-			(void)(-- _M_count);
-			co_return (true);
-		}
-		co_return (false);
-	}
+    auto __l = co_await _M_mutex.scoped();
+    if(_M_count != 0) COASYNC_ATTRIBUTE((unlikely))
+      {
+        (void)(-- _M_count);
+        co_return (true);
+      }
+    co_return (false);
+  }
+  COASYNC_ATTRIBUTE((nodiscard, always_inline)) execution_context& context() noexcept
+  {
+    return _M_mutex.context();
+  }
 private:
   mutable co_mutex 							_M_mutex;
   mutable co_condition_variable _M_condition;

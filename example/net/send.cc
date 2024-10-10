@@ -22,7 +22,7 @@ awaitable<void> do_send() {
 }
 
 int main() {
-	execution_context context {0};
+	execution_context context {concurrency_arg(0)};
 	co_spawn(context, do_send(), use_detach);
 	context.loop();
 }

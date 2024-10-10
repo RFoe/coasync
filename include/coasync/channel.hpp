@@ -30,25 +30,34 @@ private:
     mutex.unlock();
   });
 public:
-	typedef Mutex mutex_type;
-	typedef ring_container<Value, Bound> container_type;
-	typedef typename ring_container<Value, Bound>::value_type value_type;
-	typedef typename ring_container<Value, Bound>::reference_type reference_type;
-	typedef typename ring_container<Value, Bound>::const_reference_type const_reference_type;
-	typedef typename ring_container<Value, Bound>::size_type size_type;
-	
+  typedef Mutex mutex_type;
+  typedef ring_container<Value, Bound> container_type;
+  typedef typename ring_container<Value, Bound>::value_type value_type;
+  typedef typename ring_container<Value, Bound>::reference reference;
+  typedef typename ring_container<Value, Bound>::const_reference const_reference;
+  typedef typename ring_container<Value, Bound>::size_type size_type;
+
+  COASYNC_ATTRIBUTE((always_inline))
+  constexpr explicit channel(execution_context& context) noexcept
+    : _M_context(context) {}
+  constexpr channel& operator=(channel const&) = delete;
+  constexpr channel(channel const&) = delete;
+  COASYNC_ATTRIBUTE((always_inline)) channel(channel&&) noexcept = default;
+  COASYNC_ATTRIBUTE((always_inline)) channel& operator=(channel&&) noexcept = default;
+  COASYNC_ATTRIBUTE((always_inline)) ~ channel() noexcept = default;
+
   template <typename... CtorArgs>
   requires (not(sizeof...(CtorArgs) == 1 and (std::is_same_v<CtorArgs, Value> || ...)))
   COASYNC_ATTRIBUTE((nodiscard)) awaitable<void> COASYNC_API send(CtorArgs&& ... args)
   {
     static_assert(std::constructible_from<Value, CtorArgs ...>);
     Value local_value {  std::forward<CtorArgs&&>(args) ...};
-    co_await detail::suspendible<detail::enqueue_service>()(_M_queue, local_value, _M_mutex, Bound);
+    co_await detail::related_suspendible<detail::enqueue_service>(_M_context)(_M_queue, local_value, _M_mutex, Bound);
   }
   template <typename OtherValue> requires std::is_same_v<std::remove_cvref_t<OtherValue>, Value>
   COASYNC_ATTRIBUTE((nodiscard)) awaitable<void> COASYNC_API send(OtherValue&& value)
   {
-    co_await detail::suspendible<detail::enqueue_service>()(_M_queue, const_cast<Value&>(value), _M_mutex, Bound);
+    co_await detail::related_suspendible<detail::enqueue_service>(_M_context)(_M_queue, const_cast<Value&>(value), _M_mutex, Bound);
   }
   COASYNC_ATTRIBUTE((nodiscard))
   awaitable<Value> COASYNC_API receive()
@@ -61,14 +70,20 @@ public:
     {
       Value _M_value;
     } storage;
-    co_await detail::suspendible<detail::dequeue_service>()(_M_queue, storage._M_value, _M_mutex);
+    co_await detail::related_suspendible<detail::dequeue_service>(_M_context)(_M_queue, storage._M_value, _M_mutex);
     co_return std::move(storage._M_value);
   }
   COASYNC_ATTRIBUTE((nodiscard, always_inline)) static constexpr std::size_t capacity() noexcept
   {
     return Bound;
   }
+
+  COASYNC_ATTRIBUTE((nodiscard, always_inline)) execution_context& context() noexcept
+  {
+    return _M_context;
+  }
 private:
+  COASYNC_ATTRIBUTE((no_unique_address)) execution_context& _M_context;
   mutable Mutex 						_M_mutex;
   std::queue<Value, ring_container<Value, Bound>> 				_M_queue;
 };

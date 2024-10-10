@@ -33,7 +33,7 @@ awaitable<void> acceptance() noexcept
 }
 
 int main() {
-	  execution_context context {2};
+	  execution_context context {concurrency_arg(2)};
 	  co_spawn(context, acceptance(), use_detach);
 	  context.loop();
 }

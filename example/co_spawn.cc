@@ -15,7 +15,7 @@ awaitable<void> test() noexcept
 }
 int main()
 {
-  execution_context context {0};
+  execution_context context {concurrency_arg(0)};
   co_spawn(context, test(), use_detach);
   std::puts("co_spawn");
   context.loop();

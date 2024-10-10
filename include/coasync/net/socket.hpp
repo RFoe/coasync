@@ -205,7 +205,7 @@ struct __basic_socket: socket_base<execution_context>
   awaitable<void> COASYNC_API connect(endpoint_type const& ep)
   {
     assert(protocol().family() == ep.protocol().family());
-    assert(&context() == &(co_await detail::get_context()));
+//    assert(&context() == &(co_await detail::get_context()));
     if(not is_open())   COASYNC_ATTRIBUTE((unlikely)) open();
     bool previous_non_blocking = non_blocking();
     non_blocking(true);
@@ -229,7 +229,7 @@ struct __basic_socket: socket_base<execution_context>
         and detail::get_errno() != get_error_code(EWOULDBLOCK)
         and detail::get_errno() != get_error_code(EINTR))   COASYNC_ATTRIBUTE((unlikely))
       throw std::system_error(detail::get_errno(),detail::generic_category());
-    co_await detail::suspendible<detail::socketout_service>()(native_handle());
+    co_await detail::related_suspendible<detail::socketout_service>(context())(native_handle());
     socket_option::error err;
     get_option(err);
     if (int ec = err.get())   COASYNC_ATTRIBUTE((unlikely))
@@ -244,7 +244,7 @@ public:
   awaitable<int> COASYNC_API receive(Rng& buffer, message_flags flag = message_flags(0))
   requires std::same_as<protocol_type, tcp>
   {
-    assert(&context() == &(co_await detail::get_context()));
+//    assert(&context() == &(co_await detail::get_context()));
     bool previous_non_blocking = non_blocking();
     non_blocking(true);
     while(true)
@@ -260,7 +260,7 @@ public:
             and detail::get_errno() != get_error_code(EWOULDBLOCK)
             and detail::get_errno() != get_error_code(EINTR))   COASYNC_ATTRIBUTE((unlikely))
           throw std::system_error(detail::get_errno(), detail::generic_category());
-        co_await detail::suspendible<detail::socketin_service>()(native_handle());
+        co_await detail::related_suspendible<detail::socketin_service>(context())(native_handle());
         socket_option::error err;
         get_option(err);
         if (int ec = err.get())   COASYNC_ATTRIBUTE((unlikely))
@@ -273,7 +273,7 @@ public:
   awaitable<int> COASYNC_API send(Rng const& buffer, message_flags flag = message_flags(0))
   requires std::same_as<protocol_type, tcp>
   {
-    assert(&context() == &(co_await detail::get_context()));
+//    assert(&context() == &(co_await detail::get_context()));
     bool previous_non_blocking = non_blocking();
     non_blocking(true);
     while(true)
@@ -289,7 +289,7 @@ public:
             and detail::get_errno() != get_error_code(EWOULDBLOCK)
             and detail::get_errno() != get_error_code(EINTR))  COASYNC_ATTRIBUTE((unlikely))
           throw std::system_error(detail::get_errno(),detail::generic_category());
-        co_await detail::suspendible<detail::socketout_service>()(native_handle());
+        co_await detail::related_suspendible<detail::socketout_service>(context())(native_handle());
         socket_option::error err;
         get_option(err);
         if (int ec = err.get())   COASYNC_ATTRIBUTE((unlikely))
@@ -307,7 +307,7 @@ public:
   awaitable<std::pair<int, endpoint_type>> COASYNC_API receive_from(Rng& buffer, int length, message_flags flag = message_flags(0))
                                         requires std::same_as<udp, protocol_type>
   {
-    assert(&context() == &(co_await detail::get_context()));
+//    assert(&context() == &(co_await detail::get_context()));
     bool previous_non_blocking = non_blocking();
     non_blocking(true);
     ::sockaddr_in 		__sockaddr;
@@ -333,7 +333,7 @@ public:
             and detail::get_errno() != get_error_code(EWOULDBLOCK)
             and detail::get_errno() != get_error_code(EINTR))   COASYNC_ATTRIBUTE((unlikely))
           throw std::system_error(detail::get_errno(),detail::generic_category());
-        co_await detail::suspendible<detail::socketout_service>()(native_handle());
+        co_await detail::related_suspendible<detail::socketout_service>(context())(native_handle());
         socket_option::error err;
         get_option(err);
         if (int ec = err.get())   COASYNC_ATTRIBUTE((unlikely))
@@ -350,7 +350,7 @@ public:
   requires std::same_as<udp, protocol_type>
   {
     assert(protocol().family() == ep.protocol().family());
-    assert(&context() == &(co_await detail::get_context()));
+//    assert(&context() == &(co_await detail::get_context()));
     bool previous_non_blocking = non_blocking();
     non_blocking(true);
     ::sockaddr_in 		__sockaddr;
@@ -376,7 +376,7 @@ public:
             and detail::get_errno() != get_error_code(EWOULDBLOCK)
             and detail::get_errno() != get_error_code(EINTR))   COASYNC_ATTRIBUTE((unlikely))
           throw std::system_error(detail::get_errno(),detail::generic_category());
-        co_await detail::suspendible<detail::socketout_service>()(native_handle());
+        co_await detail::related_suspendible<detail::socketout_service>(context())(native_handle());
         socket_option::error err;
         get_option(err);
         if (int ec = err.get())   COASYNC_ATTRIBUTE((unlikely))

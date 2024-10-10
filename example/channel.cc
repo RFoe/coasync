@@ -15,8 +15,8 @@ awaitable<void> do_receive(channel<int, 8>& channel) {
 		std::printf("receive: %d\n", co_await channel.receive());
 }
 int main() {
- execution_context context{2};
- channel<int, 8> channel;
+ execution_context context{concurrency_arg(2)};
+ channel<int, 8> channel{context};
  co_spawn(context, do_send(channel), use_detach);
  co_spawn(context, do_send(channel), use_detach);
  co_spawn(context, do_send(channel), use_detach);

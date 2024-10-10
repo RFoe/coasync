@@ -66,7 +66,7 @@ private:
   COASYNC_ATTRIBUTE((nodiscard))
   awaitable<void> _M_do_serialize_field(T const& value, Fields const& fields)
   {
-    co_await _M_do_serialize_tuple_impl(value, fields, std::make_index_sequence<std::tuple_size_v<std::decay_t<Fields>>> {});
+    co_await _M_do_serialize_field_impl(value, fields, std::make_index_sequence<std::tuple_size_v<std::decay_t<Fields>>> {});
   }
   template <typename Aggr, std::size_t... Indices>
   COASYNC_ATTRIBUTE((nodiscard))
@@ -106,7 +106,7 @@ private:
   COASYNC_ATTRIBUTE((nodiscard))
   awaitable<void> _M_do_deserialize_field(T& value, Fields const& f)
   {
-    co_await _M_do_serialize_tuple_impl(value, f, std::make_index_sequence<std::tuple_size_v<std::decay_t<Fields>>> {});
+    co_await _M_do_deserialize_field_impl(value, f, std::make_index_sequence<std::tuple_size_v<std::decay_t<Fields>>> {});
   }
   template <typename Aggr, std::size_t... Indices>
   COASYNC_ATTRIBUTE((nodiscard))

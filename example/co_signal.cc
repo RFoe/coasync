@@ -16,7 +16,7 @@ awaitable<void> do_raise(int seconds) noexcept
 }
 int main()
 {
-  execution_context context {0};
+  execution_context context {concurrency_arg(0)};
   co_signal<SIGINT>(context, []
   ([[maybe_unused]]int) noexcept {
     std::puts("interpreted!!! callback 001");

@@ -9,6 +9,8 @@
 #include "../../co_spawn.hpp"
 #include "../../detail/get_context.hpp"
 #include "../serde_stream.hpp"
+#include "../protocol.hpp"
+#include "../endpoint.hpp"
 #include <unordered_map>
 
 namespace COASYNC_ATTRIBUTE((gnu::visibility("default"))) coasync
