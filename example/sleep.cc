@@ -13,7 +13,7 @@ awaitable<void> test(int seconds)
 }
 
 int main() {
-  execution_context context{0};
+  execution_context context{concurrency_arg(0)};
   /// Initiate no child threads
   co_spawn(context, test(1), use_detach);
   co_spawn(context, test(2), use_detach);

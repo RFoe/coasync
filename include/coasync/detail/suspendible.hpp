@@ -53,6 +53,45 @@ struct [[nodiscard]] related_suspendible
 private:
   execution_context& _M_context;
 };
+template <typename service_type, typename... Overlaps>
+struct [[nodiscard]] transformed_awaitable
+{
+  COASYNC_ATTRIBUTE((always_inline))
+  explicit constexpr transformed_awaitable(
+    COASYNC_ATTRIBUTE((maybe_unused)) std::in_place_type_t<service_type>,
+    Overlaps&& ... overlaps) noexcept
+    : _M_overlaps(std::forward_as_tuple(static_cast<Overlaps&&>(overlaps) ...))
+  {}
+  constexpr transformed_awaitable& operator=(transformed_awaitable const&) = delete;
+  constexpr transformed_awaitable& operator=(transformed_awaitable&&) = delete;
+  COASYNC_ATTRIBUTE((always_inline)) ~ transformed_awaitable() = default;
+  bool await_ready() const noexcept
+  {
+    return false;
+  }
+  template <typename Ref, typename Alloc>
+  std::coroutine_handle<>
+  await_suspend(std::coroutine_handle<awaitable_frame<Ref, Alloc>> coroutine) const noexcept
+  {
+    std::apply([coroutine](Overlaps&&... overlaps)
+    {
+    	execution_context& context = *coroutine.promise().get_context();
+		  std::coroutine_handle<awaitable_frame_base> frame = std::coroutine_handle<awaitable_frame_base>::from_address(coroutine.address());
+      use_service<service_type>(context).post_frame(frame, std::forward<Overlaps>(overlaps) ...);
+    }, _M_overlaps);
+    return std::noop_coroutine();
+  }
+  void await_resume() const noexcept
+  {
+  }
+private:
+  COASYNC_ATTRIBUTE((no_unique_address)) std::tuple<Overlaps&& ...> _M_overlaps;
+};
+#if defined(__cpp_deduction_guides)
+template <typename service_type, typename... Overlaps>
+transformed_awaitable(std::in_place_type_t<service_type>,Overlaps&& ...)
+-> transformed_awaitable<service_type, Overlaps ...>;
+#endif
 }
 }
 #endif

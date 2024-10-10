@@ -62,7 +62,7 @@ struct basic_time_service
   void post_frame(
     std::coroutine_handle<awaitable_frame_base> 		frame,
     /// post_frame: overlaps
-    std::chrono::time_point<Clock, Duration> const 	timeout,
+    std::chrono::time_point<Clock, Duration> const& timeout,
     /// optional cancellation token[sleep_for/until]
     long* 									cancellation = nullptr
   )
