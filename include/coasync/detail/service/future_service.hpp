@@ -17,6 +17,7 @@ namespace COASYNC_ATTRIBUTE((gnu::visibility("default"))) detail
 template <typename execution_context>
 struct basic_future_service
 {
+private:
   struct composed_context
   {
     void* _M_future;
@@ -39,9 +40,26 @@ struct basic_future_service
     std::coroutine_handle<awaitable_frame_base> _M_frame;
     composed_context 														_M_context;
   };
-  explicit basic_future_service(execution_context& context) noexcept: _M_context(context) {}
+public:
+  typedef basic_lockable mutex_type;
+
+  COASYNC_ATTRIBUTE((always_inline))
+  constexpr explicit basic_future_service(execution_context& context) noexcept
+    : _M_context(context) {}
+  constexpr basic_future_service& operator=(basic_future_service const&) = delete;
+  constexpr basic_future_service(basic_future_service const&) = delete;
+  COASYNC_ATTRIBUTE((always_inline)) basic_future_service(basic_future_service&&) noexcept = default;
+  COASYNC_ATTRIBUTE((always_inline)) basic_future_service& operator=(basic_future_service&&) noexcept = default;
+  COASYNC_ATTRIBUTE((always_inline)) ~ basic_future_service() noexcept = default;
+
+  COASYNC_ATTRIBUTE((nodiscard, always_inline))
+  static constexpr std::size_t overlap_arity() noexcept
+  {
+    return 1u;
+  }
+
   template <typename T>
-  void post_frame(
+  COASYNC_ATTRIBUTE((always_inline)) void post_frame(
     std::coroutine_handle<awaitable_frame_base> frame,
     /// post_frame: overlaps
     std::future<T>& future)
@@ -52,7 +70,7 @@ struct basic_future_service
     /// check parrallelism
     _M_forward.emplace_front(frame, composed_context { &future, &delegator<T>::S_delegate });
   }
-  void commit_frame()
+  COASYNC_ATTRIBUTE((always_inline)) void commit_frame()
   {
     std::forward_list<std::coroutine_handle<awaitable_frame_base>> outstanding;
     COASYNC_ATTRIBUTE((maybe_unused)) std::unique_lock<basic_lockable> alternative_lock;

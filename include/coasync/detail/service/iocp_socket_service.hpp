@@ -25,12 +25,26 @@ namespace COASYNC_ATTRIBUTE((gnu::visibility("default"))) detail
 template <typename execution_context, bool subcribe_sockin>
 struct [[nodiscard]] basic_iocp_socket_service
 {
-  COASYNC_ATTRIBUTE((always_inline)) explicit basic_iocp_socket_service(execution_context& context) noexcept: _M_context(context)
+  typedef basic_lockable mutex_type;
+
+  COASYNC_ATTRIBUTE((always_inline)) constexpr explicit basic_iocp_socket_service(execution_context& context) noexcept: _M_context(context)
   {
     _M_iocp = ::CreateIoCompletionPort(INVALID_HANDLE_VALUE, nullptr, 0, 0);
     if (_M_iocp == nullptr) COASYNC_ATTRIBUTE((unlikely))
       throw std::system_error(detail::get_errno(), detail::generic_category());
   }
+  constexpr basic_iocp_socket_service& operator=(basic_iocp_socket_service const&) = delete;
+  constexpr basic_iocp_socket_service(basic_iocp_socket_service const&) = delete;
+  COASYNC_ATTRIBUTE((always_inline)) basic_iocp_socket_service(basic_iocp_socket_service&&) noexcept = default;
+  COASYNC_ATTRIBUTE((always_inline)) basic_iocp_socket_service& operator=(basic_iocp_socket_service&&) noexcept = default;
+  COASYNC_ATTRIBUTE((always_inline)) ~ basic_iocp_socket_service() noexcept = default;
+
+  COASYNC_ATTRIBUTE((nodiscard, always_inline))
+  static constexpr std::size_t overlap_arity() noexcept
+  {
+    return 1u;
+  }
+
   COASYNC_ATTRIBUTE((always_inline)) void COASYNC_API post_frame(std::coroutine_handle<awaitable_frame_base> frame, SOCKET sockfd)
   {
     COASYNC_ATTRIBUTE((maybe_unused)) std::unique_lock<basic_lockable> alternative_lock;
@@ -77,7 +91,7 @@ struct [[nodiscard]] basic_iocp_socket_service
     if (not ::CancelIoEx(reinterpret_cast<HANDLE>(sockfd), std::addressof(_M_overlapped[sockfd]))) COASYNC_ATTRIBUTE((unlikely))
       throw std::system_error(detail::get_errno(), detail::generic_category());
     auto f = std::coroutine_handle<awaitable_frame_base>::from_address(reinterpret_cast<awaitable_frame_base*>(_M_overlapped[sockfd].Internal));
-		_M_overlapped.erase(sockfd);
+    _M_overlapped.erase(sockfd);
     _M_context.push_frame_to_executor(f);
     if(alternative_lock.owns_lock()) COASYNC_ATTRIBUTE((likely)) alternative_lock.unlock();
   }

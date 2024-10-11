@@ -20,7 +20,14 @@ private:
   typedef __basic_socket<tcp, execution_context> 	socket;
 public:
   COASYNC_ATTRIBUTE((always_inline))
-  constexpr explicit __rpc_client(socket s) noexcept: _M_stream(std::move(s)) {}
+  constexpr explicit __rpc_client(socket s) noexcept
+    : _M_stream(std::move(s)) {}
+  constexpr __rpc_client& operator=(__rpc_client const&) = delete;
+  constexpr __rpc_client(__rpc_client const&) = delete;
+  COASYNC_ATTRIBUTE((always_inline)) __rpc_client(__rpc_client&&) noexcept = default;
+  COASYNC_ATTRIBUTE((always_inline)) __rpc_client& operator=(__rpc_client&&) noexcept = default;
+  COASYNC_ATTRIBUTE((always_inline)) ~ __rpc_client() noexcept = default;
+
   template <typename R, typename... Args>
   COASYNC_ATTRIBUTE((nodiscard))
   awaitable<R> call(std::string const& __fn, Args&& ... __args)
@@ -32,8 +39,8 @@ public:
     {
       R _M_value;
     } __storage;
-		co_await _M_stream.deserialize((R &)__storage._M_value);
-		co_return std::move(__storage._M_value);
+    co_await _M_stream.deserialize((R&)__storage._M_value);
+    co_return std::move(__storage._M_value);
   }
 private:
   serde_stream _M_stream;

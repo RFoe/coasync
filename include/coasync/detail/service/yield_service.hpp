@@ -20,26 +20,39 @@ namespace COASYNC_ATTRIBUTE((gnu::visibility("default"))) detail
 template <typename execution_context>
 struct basic_yield_service
 {
-  explicit basic_yield_service(execution_context& context) noexcept: _M_context(context) {}
-  void post_frame(std::coroutine_handle<awaitable_frame_base> frame)
+  COASYNC_ATTRIBUTE((always_inline))
+  constexpr explicit basic_yield_service(execution_context& context) noexcept
+    : _M_context(context) {}
+  constexpr basic_yield_service& operator=(basic_yield_service const&) = delete;
+  constexpr basic_yield_service(basic_yield_service const&) = delete;
+  COASYNC_ATTRIBUTE((always_inline)) basic_yield_service(basic_yield_service&&) noexcept = default;
+  COASYNC_ATTRIBUTE((always_inline)) basic_yield_service& operator=(basic_yield_service&&) noexcept = default;
+  COASYNC_ATTRIBUTE((always_inline)) ~ basic_yield_service() noexcept = default;
+
+  COASYNC_ATTRIBUTE((nodiscard, always_inline))
+  static constexpr std::size_t overlap_arity() noexcept
+  {
+    return 0u;
+  }
+  COASYNC_ATTRIBUTE((always_inline)) void post_frame(std::coroutine_handle<awaitable_frame_base> frame)
   {
     COASYNC_ATTRIBUTE((maybe_unused)) std::unique_lock<basic_lockable> alternative_lock;
     if(_M_context.concurrency())  COASYNC_ATTRIBUTE((likely))
       std::unique_lock<basic_lockable>(_M_lockable).swap(alternative_lock);
-		/// check concurrent threading
-		/// Locking is not required for single thread
+    /// check concurrent threading
+    /// Locking is not required for single thread
     _M_forward.emplace_front(frame);
   }
-  void commit_frame()
+  COASYNC_ATTRIBUTE((always_inline)) void commit_frame()
   {
     std::forward_list<std::coroutine_handle<awaitable_frame_base>> outstanding;
     COASYNC_ATTRIBUTE((maybe_unused)) std::unique_lock<basic_lockable> alternative_lock;
     if(_M_context.concurrency())  COASYNC_ATTRIBUTE((likely))
       std::unique_lock<basic_lockable>(_M_lockable).swap(alternative_lock);
-		/// check concurrent threading
-		/// Locking is not required for single thread
-		_M_forward.swap(outstanding);
-		/// swap out the coroutines to be resumed, present lock nesting[push_frame_to_executor does locking]
+    /// check concurrent threading
+    /// Locking is not required for single thread
+    _M_forward.swap(outstanding);
+    /// swap out the coroutines to be resumed, present lock nesting[push_frame_to_executor does locking]
     if(alternative_lock.owns_lock()) COASYNC_ATTRIBUTE((likely)) alternative_lock.unlock();
     /// check concurrent threading
     for(std::coroutine_handle<awaitable_frame_base> frame: outstanding)

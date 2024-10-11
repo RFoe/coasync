@@ -26,15 +26,23 @@ struct __serde_stream: detail::serde_stream_base<__serde_stream<execution_contex
   using detail::serde_stream_base<__serde_stream>::serialize;
   using detail::serde_stream_base<__serde_stream>::deserialize;
 
-	COASYNC_ATTRIBUTE((always_inline))
-	constexpr explicit __serde_stream(__basic_socket<tcp, execution_context> socket) noexcept
-    : _M_socket(std::move(socket)) {}
-
-	COASYNC_ATTRIBUTE((nodiscard))
+  COASYNC_ATTRIBUTE((always_inline))
+  constexpr explicit __serde_stream(__basic_socket<tcp, execution_context> socket) noexcept
+    : _M_socket(std::move(socket))
+  {
+    COASYNC_ASSERT((_M_socket.is_open()));
+  }
+  constexpr __serde_stream& operator=(__serde_stream const&) = delete;
+  constexpr __serde_stream(__serde_stream const&) = delete;
+  COASYNC_ATTRIBUTE((always_inline)) __serde_stream(__serde_stream&&) noexcept = default;
+  COASYNC_ATTRIBUTE((always_inline)) __serde_stream& operator=(__serde_stream&&) noexcept = default;
+  COASYNC_ATTRIBUTE((always_inline)) ~ __serde_stream() noexcept = default;
+  
+  COASYNC_ATTRIBUTE((nodiscard))
   awaitable<void> read(char_type* s, std::streamsize count) COASYNC_ATTRIBUTE((gnu::nonnull))
   {
-  	/// If there are not enough bytes of data in the current buffer, more data
-		/// needs to be read from the socket.
+    /// If there are not enough bytes of data in the current buffer, more data
+    /// needs to be read from the socket.
     if(_M_available < count) COASYNC_ATTRIBUTE((unlikely))
       {
         std::string buffer = co_await receive_at_least(_M_socket, count);

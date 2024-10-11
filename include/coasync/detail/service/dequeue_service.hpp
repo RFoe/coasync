@@ -18,6 +18,7 @@ namespace COASYNC_ATTRIBUTE((gnu::visibility("default"))) detail
 template <typename execution_context>
 struct basic_dequeue_service
 {
+private:
   struct composed_context
   {
     void* _M_queue;
@@ -50,9 +51,25 @@ struct basic_dequeue_service
       return queue_consumable;
     }
   };
-  explicit basic_dequeue_service(execution_context& context) noexcept: _M_context(context) {}
+public:
+  typedef basic_lockable mutex_type;
+  
+  COASYNC_ATTRIBUTE((always_inline))
+  constexpr explicit basic_dequeue_service(execution_context& context) noexcept
+    : _M_context(context) {}
+  constexpr basic_dequeue_service& operator=(basic_dequeue_service const&) = delete;
+  constexpr basic_dequeue_service(basic_dequeue_service const&) = delete;
+  COASYNC_ATTRIBUTE((always_inline)) basic_dequeue_service(basic_dequeue_service&&) noexcept = default;
+  COASYNC_ATTRIBUTE((always_inline)) basic_dequeue_service& operator=(basic_dequeue_service&&) noexcept = default;
+  COASYNC_ATTRIBUTE((always_inline)) ~ basic_dequeue_service() noexcept = default;
+
+  COASYNC_ATTRIBUTE((nodiscard, always_inline))
+	static constexpr std::size_t overlap_arity() noexcept
+  {
+    return 3u;
+  }
   template <typename Value, typename Container, typename Mutex>
-  void post_frame(
+    COASYNC_ATTRIBUTE((always_inline)) void post_frame(
     std::coroutine_handle<awaitable_frame_base> frame,
     /// post_frame overlaps
     std::queue<Value, Container>& 	queue,
@@ -69,7 +86,7 @@ struct basic_dequeue_service
       &queue, &value, &mutex, &delegator<Value, Container, Mutex>::S_delegate
     });
   }
-  void commit_frame()
+    COASYNC_ATTRIBUTE((always_inline)) void commit_frame()
   {
     std::forward_list<std::coroutine_handle<awaitable_frame_base>> outstanding;
     COASYNC_ATTRIBUTE((maybe_unused)) std::unique_lock<basic_lockable> alternative_lock;

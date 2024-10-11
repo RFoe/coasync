@@ -17,14 +17,32 @@ namespace COASYNC_ATTRIBUTE((gnu::visibility("default"))) detail
 template <typename execution_context>
 struct basic_flag_service
 {
+private:
   struct value_type
   {
     std::coroutine_handle<awaitable_frame_base> _M_frame;
     std::atomic_flag* 													_M_flag;
     /// weak reference, non-owning
   };
-  explicit basic_flag_service(execution_context& context) noexcept: _M_context(context) {}
-  void post_frame(
+public:
+	typedef basic_lockable mutex_type;
+	
+  COASYNC_ATTRIBUTE((always_inline))
+  constexpr explicit basic_flag_service(execution_context& context) noexcept
+    : _M_context(context) {}
+  constexpr basic_flag_service& operator=(basic_flag_service const&) = delete;
+  constexpr basic_flag_service(basic_flag_service const&) = delete;
+  COASYNC_ATTRIBUTE((always_inline)) basic_flag_service(basic_flag_service&&) noexcept = default;
+  COASYNC_ATTRIBUTE((always_inline)) basic_flag_service& operator=(basic_flag_service&&) noexcept = default;
+  COASYNC_ATTRIBUTE((always_inline)) ~ basic_flag_service() noexcept = default;
+
+  COASYNC_ATTRIBUTE((nodiscard, always_inline))
+  static constexpr std::size_t overlap_arity() noexcept
+  {
+    return 1u;
+  }
+
+  COASYNC_ATTRIBUTE((always_inline)) void post_frame(
     std::coroutine_handle<awaitable_frame_base> frame,
     /// post_frame: overlaps
     std::atomic_flag& flag)
@@ -35,7 +53,7 @@ struct basic_flag_service
     /// check parrallelism
     _M_forward.emplace_front(frame, &flag);
   }
-  void commit_frame()
+  COASYNC_ATTRIBUTE((always_inline)) void commit_frame()
   {
     std::forward_list<std::coroutine_handle<awaitable_frame_base>> outstanding;
     COASYNC_ATTRIBUTE((maybe_unused)) std::unique_lock<basic_lockable> alternative_lock;

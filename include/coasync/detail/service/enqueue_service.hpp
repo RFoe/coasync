@@ -18,6 +18,7 @@ namespace COASYNC_ATTRIBUTE((gnu::visibility("default"))) detail
 template <typename execution_context>
 struct basic_enqueue_service
 {
+private:
   struct composed_context
   {
     void* 			_M_queue;
@@ -49,7 +50,24 @@ struct basic_enqueue_service
       return queue_producable;
     }
   };
-  explicit basic_enqueue_service(execution_context& context) noexcept: _M_context(context) {}
+public:
+	typedef basic_lockable mutex_type;
+	
+  COASYNC_ATTRIBUTE((always_inline))
+  constexpr explicit basic_enqueue_service(execution_context& context) noexcept
+    : _M_context(context) {}
+  constexpr basic_enqueue_service& operator=(basic_enqueue_service const&) = delete;
+  constexpr basic_enqueue_service(basic_enqueue_service const&) = delete;
+  COASYNC_ATTRIBUTE((always_inline)) basic_enqueue_service(basic_enqueue_service&&) noexcept = default;
+  COASYNC_ATTRIBUTE((always_inline)) basic_enqueue_service& operator=(basic_enqueue_service&&) noexcept = default;
+  COASYNC_ATTRIBUTE((always_inline)) ~ basic_enqueue_service() noexcept = default;
+
+  COASYNC_ATTRIBUTE((nodiscard, always_inline))
+	static constexpr std::size_t overlap_arity() noexcept
+  {
+    return 4u;
+  }
+
   template <typename Value, typename Container, typename Mutex>
   void post_frame(
     std::coroutine_handle<awaitable_frame_base> frame,

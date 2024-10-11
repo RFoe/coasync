@@ -25,10 +25,25 @@ namespace COASYNC_ATTRIBUTE((gnu::visibility("default"))) detail
 template <typename execution_context, bool subscribe_sockin>
 struct basic_epoll_socket_service
 {
-  COASYNC_ATTRIBUTE((always_inline)) explicit basic_epoll_socket_service(execution_context& context) noexcept: _M_context(context)
+  typedef basic_lockable mutex_type;
+
+  COASYNC_ATTRIBUTE((always_inline))
+  constexpr explicit basic_epoll_socket_service(execution_context& context) noexcept
+    : _M_context(context)
   {
     if((_M_epollfd = ::epoll_create1(0)) < 0)
       throw std::system_error(detail::get_errno(), detail::generic_category());
+  }
+  constexpr basic_epoll_socket_service& operator=(basic_epoll_socket_service const&) = delete;
+  constexpr basic_epoll_socket_service(basic_epoll_socket_service const&) = delete;
+  COASYNC_ATTRIBUTE((always_inline)) basic_epoll_socket_service(basic_epoll_socket_service&&) noexcept = default;
+  COASYNC_ATTRIBUTE((always_inline)) basic_epoll_socket_service& operator=(basic_epoll_socket_service&&) noexcept = default;
+  COASYNC_ATTRIBUTE((always_inline)) ~ basic_epoll_socket_service() noexcept = default;
+  COASYNC_ATTRIBUTE((nodiscard, always_inline))
+
+  static constexpr std::size_t overlap_arity() noexcept
+  {
+    return 1u;
   }
   COASYNC_ATTRIBUTE((always_inline)) void post_frame(std::coroutine_handle<awaitable_frame_base> frame, int sockfd)
   {
@@ -83,7 +98,14 @@ struct basic_epoll_socket_service
     deprecated = std::move(_M_event_set[sockfd]);
     _M_count --;
     if(alternative_lock.owns_lock()) COASYNC_ATTRIBUTE((likely)) alternative_lock.unlock();
-    _M_context.push_frame_to_executor(deprecated);
+    if(deprecated != nullptr) COASYNC_ATTRIBUTE((likely))
+      {
+      	std::exception_ptr eptr = std::make_exception_ptr(cancellation_error(cancellation_errc::cancellation_requested));
+				deprecated.promise().set_exception(std::move(eptr));
+        _M_context.push_frame_to_executor(deprecated);
+      }
+    else  COASYNC_ATTRIBUTE((unlikely))
+			throw cancellation_error(cancellation_errc::no_frame_registered);
   }
 private:
   int _M_epollfd;

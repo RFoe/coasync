@@ -13,14 +13,14 @@
 namespace COASYNC_ATTRIBUTE((gnu::visibility("default"))) coasync
 {
 /// may be used to send messages between different parts of the same application.
-/// the set of messages supported by a channel is specified by its template parameters.
+/// the set of messages supported by a basic_channel is specified by its template parameters.
 /// Messages can be sent and received using asynchronous or non-blocking synchronous operations.
-template <typename Value, std::size_t Bound, typename Mutex = detail::basic_lockable>
-struct channel
+template <typename execution_context, typename Value, std::size_t Bound, typename Mutex = detail::basic_lockable>
+struct COASYNC_ATTRIBUTE((nodiscard)) basic_channel
 {
-  /// An async multi-producer multi-consumer channel, where each message can be received
+  /// An async multi-producer multi-consumer basic_channel, where each message can be received
   /// by only one of all existing consumers.
-  /// Bounded channel with limited capacity.
+  /// Bounded basic_channel with limited capacity.
 private:
   static_assert(
     std::is_default_constructible_v<Mutex>
@@ -38,13 +38,13 @@ public:
   typedef typename ring_container<Value, Bound>::size_type size_type;
 
   COASYNC_ATTRIBUTE((always_inline))
-  constexpr explicit channel(execution_context& context) noexcept
+  constexpr explicit basic_channel(execution_context& context) noexcept
     : _M_context(context) {}
-  constexpr channel& operator=(channel const&) = delete;
-  constexpr channel(channel const&) = delete;
-  COASYNC_ATTRIBUTE((always_inline)) channel(channel&&) noexcept = default;
-  COASYNC_ATTRIBUTE((always_inline)) channel& operator=(channel&&) noexcept = default;
-  COASYNC_ATTRIBUTE((always_inline)) ~ channel() noexcept = default;
+  constexpr basic_channel& operator=(basic_channel const&) = delete;
+  constexpr basic_channel(basic_channel const&) = delete;
+  COASYNC_ATTRIBUTE((always_inline)) basic_channel(basic_channel&&) noexcept = default;
+  COASYNC_ATTRIBUTE((always_inline)) basic_channel& operator=(basic_channel&&) noexcept = default;
+  COASYNC_ATTRIBUTE((always_inline)) ~ basic_channel() noexcept = default;
 
   template <typename... CtorArgs>
   requires (not(sizeof...(CtorArgs) == 1 and (std::is_same_v<CtorArgs, Value> || ...)))
@@ -87,5 +87,8 @@ private:
   mutable Mutex 						_M_mutex;
   std::queue<Value, ring_container<Value, Bound>> 				_M_queue;
 };
+template <typename Value, std::size_t Bound, typename Mutex>
+using channel
+  = basic_channel<execution_context, Value, Bound, Mutex>;
 }
 #endif

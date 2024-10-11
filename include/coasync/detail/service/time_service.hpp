@@ -7,6 +7,7 @@
 
 #include "../awaitable_frame_base.hpp"
 #include "../basic_lockable.hpp"
+#include "../../cancellation_error.hpp"
 #include <queue>
 #include <forward_list>
 #include <mutex>
@@ -18,6 +19,7 @@ namespace COASYNC_ATTRIBUTE((gnu::visibility("default"))) detail
 template <typename execution_context>
 struct basic_time_service
 {
+private:
   struct value_type
   {
     std::chrono::system_clock::rep 	_M_rep;
@@ -25,19 +27,19 @@ struct basic_time_service
     long 														_M_cancellation;
     /// cancellation token for deadline_timer
     COASYNC_ATTRIBUTE((always_inline))
-		void request_cancel() noexcept
+    void request_cancel() noexcept
     {
       _M_cancellation = -1;
       /// Induce the asynchronous operation that has been initiated to return later
     }
     COASYNC_ATTRIBUTE((nodiscard, always_inline))
-		bool cancel_requested() const noexcept
+    bool cancel_requested() const noexcept
     {
       return _M_cancellation == -1;
       /// check cancelled
     }
-		COASYNC_ATTRIBUTE((nodiscard, always_inline))
-		bool operator<(value_type const& other) const noexcept
+    COASYNC_ATTRIBUTE((nodiscard, always_inline))
+    bool operator<(value_type const& other) const noexcept
     {
       return _M_rep > other._M_rep;
     }
@@ -47,19 +49,35 @@ struct basic_time_service
     typedef std::priority_queue<value_type>::container_type::iterator iterator;
     /// default container: std::vector<value_type>
     COASYNC_ATTRIBUTE((nodiscard, always_inline))
-		iterator begin()
+    iterator begin()
     {
       return this->c.begin();
     }
-		COASYNC_ATTRIBUTE((nodiscard, always_inline))
-		iterator end()
+    COASYNC_ATTRIBUTE((nodiscard, always_inline))
+    iterator end()
     {
       return this->c.end();
     }
   };
-  explicit basic_time_service(execution_context& context) noexcept: _M_context(context) {}
+public:
+  typedef basic_lockable mutex_type;
+
+  COASYNC_ATTRIBUTE((always_inline))
+  constexpr explicit basic_time_service(execution_context& context) noexcept
+    : _M_context(context) {}
+  constexpr basic_time_service& operator=(basic_time_service const&) = delete;
+  constexpr basic_time_service(basic_time_service const&) = delete;
+  COASYNC_ATTRIBUTE((always_inline)) basic_time_service(basic_time_service&&) noexcept = default;
+  COASYNC_ATTRIBUTE((always_inline)) basic_time_service& operator=(basic_time_service&&) noexcept = default;
+  COASYNC_ATTRIBUTE((always_inline)) ~ basic_time_service() noexcept = default;
+
+  COASYNC_ATTRIBUTE((nodiscard, always_inline))
+  static constexpr std::size_t overlap_arity() noexcept
+  {
+    return 2u;
+  }
   template <typename Clock, typename Duration>
-  void post_frame(
+  COASYNC_ATTRIBUTE((always_inline)) void post_frame(
     std::coroutine_handle<awaitable_frame_base> 		frame,
     /// post_frame: overlaps
     std::chrono::time_point<Clock, Duration> const& timeout,
@@ -76,15 +94,15 @@ struct basic_time_service
     _M_queue.emplace(timeout_rep, frame, _M_counter.fetch_add(1, std::memory_order_release));
   }
   template <typename Rep, typename Period>
-  void post_frame(
+  COASYNC_ATTRIBUTE((always_inline)) void post_frame(
     std::coroutine_handle<awaitable_frame_base> 	frame,
     std::chrono::duration<Rep, Period> const& 		duration,
     long* 									cancellation = nullptr)
   {
-  	/// reuse post_frame(..., std::chrono::time_point)
+    /// reuse post_frame(..., std::chrono::time_point)
     post_frame(frame, std::chrono::system_clock::now() + duration, cancellation);
   }
-  void commit_frame()
+  COASYNC_ATTRIBUTE((always_inline)) void commit_frame()
   {
     std::forward_list<std::coroutine_handle<awaitable_frame_base>> outstanding;
     auto present_rep = std::chrono::system_clock::now().time_since_epoch().count();
@@ -95,10 +113,10 @@ struct basic_time_service
     while(not _M_queue.empty() and _M_queue.top()._M_rep < present_rep)
       {
         if(not _M_queue.top().cancel_requested()) COASYNC_ATTRIBUTE((likely))
-        /// maybe cancelled: if so, will be ignored
+          /// maybe cancelled: if so, will be ignored
           outstanding.emplace_front(_M_queue.top()._M_frame);
-          /// Save the coroutine handle to be resumed, and then execute it
-					/// after unlocking the alternative_lock to prevent lock nesting
+        /// Save the coroutine handle to be resumed, and then execute it
+        /// after unlocking the alternative_lock to prevent lock nesting
         _M_queue.pop();
       }
     if(alternative_lock.owns_lock()) COASYNC_ATTRIBUTE((likely)) alternative_lock.unlock();
@@ -121,9 +139,16 @@ struct basic_time_service
           break;
         }
     if(alternative_lock.owns_lock()) COASYNC_ATTRIBUTE((likely)) alternative_lock.unlock();
-		/// check parrallelism
-		_M_context.push_frame_to_executor(deprecated);
-		/// resume immediately with cancellation error
+    /// check parrallelism
+    if(deprecated != nullptr) COASYNC_ATTRIBUTE((likely))
+      {
+      	std::exception_ptr eptr = std::make_exception_ptr(cancellation_error(cancellation_errc::cancellation_requested));
+				deprecated.promise().set_exception(std::move(eptr));
+        _M_context.push_frame_to_executor(deprecated);
+      }
+    else  COASYNC_ATTRIBUTE((unlikely))
+			throw cancellation_error(cancellation_errc::no_frame_registered);
+    /// resume immediately with cancellation error
   }
 private:
   execution_context& 			_M_context;

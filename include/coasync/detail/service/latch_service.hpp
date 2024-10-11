@@ -18,13 +18,31 @@ namespace COASYNC_ATTRIBUTE((gnu::visibility("default"))) detail
 template <typename execution_context>
 struct basic_latch_service
 {
+private:
   struct value_type
   {
     std::coroutine_handle<awaitable_frame_base> _M_frame;
     std::latch* 																_M_latch;
     /// weak reference, non-owning
   };
-  explicit basic_latch_service(execution_context& context) noexcept: _M_context(context) {}
+public:
+  typedef basic_lockable mutex_type;
+
+  COASYNC_ATTRIBUTE((always_inline))
+  constexpr explicit basic_latch_service(execution_context& context) noexcept
+    : _M_context(context) {}
+  constexpr basic_latch_service& operator=(basic_latch_service const&) = delete;
+  constexpr basic_latch_service(basic_latch_service const&) = delete;
+  COASYNC_ATTRIBUTE((always_inline)) basic_latch_service(basic_latch_service&&) noexcept = default;
+  COASYNC_ATTRIBUTE((always_inline)) basic_latch_service& operator=(basic_latch_service&&) noexcept = default;
+  COASYNC_ATTRIBUTE((always_inline)) ~ basic_latch_service() noexcept = default;
+
+  COASYNC_ATTRIBUTE((nodiscard, always_inline))
+  static constexpr std::size_t overlap_arity() noexcept
+  {
+    return 1u;
+  }
+
   void post_frame(std::coroutine_handle<awaitable_frame_base> frame, std::latch& latch)
   {
     COASYNC_ATTRIBUTE((maybe_unused)) std::unique_lock<basic_lockable> alternative_lock;

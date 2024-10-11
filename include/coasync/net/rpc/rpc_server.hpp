@@ -35,8 +35,8 @@ template <typename execution_context> struct __rpc_server
 private:
   typedef std::unordered_map<std::string, async_fn<awaitable<void>(serde_stream&)>> service_table;
 public:
-	typedef tcp 																			protocol_type;
-	typedef std::string                               service_key;
+  typedef tcp 																			protocol_type;
+  typedef std::string                               service_key;
   typedef __serde_stream<execution_context> 				serde_stream;
   typedef __basic_acceptor<tcp, execution_context> 	acceptor;
   template <typename F> requires detail::function_traits<F>::value
@@ -53,7 +53,6 @@ public:
       try
         {
           co_await __stream.deserialize(args);
-          std::this_thread::sleep_for(std::chrono::seconds(2));
           co_await __stream.serialize(std::apply(__f, args));
         }
       catch(std::system_error& err)
@@ -62,6 +61,10 @@ public:
           if(err.code().value() == static_cast<int>(std::errc::connection_aborted)) COASYNC_ATTRIBUTE((likely))
             co_return;
           std::rethrow_exception(std::make_exception_ptr(std::move(err)));
+        }
+      catch(...)
+        {
+          std::rethrow_exception(std::current_exception());
         }
     });
   }
@@ -90,13 +93,30 @@ public:
                     break;
                   std::rethrow_exception(std::make_exception_ptr(std::move(err)));
                 }
+              if(not __table->contains(__fn)) COASYNC_ATTRIBUTE((unlikely))
+                throw std::runtime_error("rpc-service not found");
               co_await (* __table)[__fn](__stream);
             }
-        }(serde_stream(std::move(socket)), &_M_services), use_detach);
+        }(serde_stream(std::move(socket)), std::addressof(_M_services)), use_detach);
       }
   }
   COASYNC_ATTRIBUTE((always_inline))
-  explicit __rpc_server(acceptor ac): _M_acceptor(std::move(ac)) {}
+  explicit __rpc_server(acceptor ac)
+    : _M_acceptor(std::move(ac))
+  {
+    COASYNC_ASSERT((_M_acceptor.is_open()));
+  }
+  constexpr __rpc_server& operator=(__rpc_server const&) = delete;
+  constexpr __rpc_server(__rpc_server const&) = delete;
+  COASYNC_ATTRIBUTE((always_inline)) __rpc_server(__rpc_server&&) noexcept = default;
+  COASYNC_ATTRIBUTE((always_inline)) __rpc_server& operator=(__rpc_server&&) noexcept = default;
+  COASYNC_ATTRIBUTE((always_inline)) ~ __rpc_server() noexcept = default;
+
+  COASYNC_ATTRIBUTE((nodiscard, always_inline))
+  __rpc_server::acceptor& get_acceptor() noexcept
+  {
+    return _M_acceptor;
+  }
 private:
   service_table _M_services;
   acceptor 			_M_acceptor;
