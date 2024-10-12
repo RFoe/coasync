@@ -18,6 +18,7 @@ awaitable<void> test() noexcept {
 		return a + b;
 	});
   co_await server.start();
+  std::puts("start return");
 }
 int main() {
  	execution_context ctx {concurrency_arg(0)};

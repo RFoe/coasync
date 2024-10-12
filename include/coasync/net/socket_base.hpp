@@ -55,23 +55,37 @@ struct socket_base
   {
     return native_handle() != native_handle_type(-1);
   }
-	/// Cancel all asynchronous operations associated with the socket.
+  /// Cancel all asynchronous operations associated with the socket.
   COASYNC_ATTRIBUTE((always_inline))
   void COASYNC_API cancel()
   {
     if(not is_open())   COASYNC_ATTRIBUTE((unlikely))
-		 return;
-    use_service<detail::socketin_service>(context()).cancel_frame(native_handle());
-    use_service<detail::socketout_service>(context()).cancel_frame(native_handle());
+      return;
+    try
+      {
+        use_service<detail::socketin_service>(context()).cancel_frame(native_handle());
+        use_service<detail::socketout_service>(context()).cancel_frame(native_handle());
+      }
+    catch(coasync::cancellation_error& error)
+      {
+        if(error.code()
+            == std::make_error_code(static_cast<std::errc>(cancellation_errc::no_frame_registered))) COASYNC_ATTRIBUTE((likely))
+          return;
+        std::rethrow_exception(std::make_exception_ptr(std::move(error)));
+      }
+    catch(...)
+      {
+        std::rethrow_exception(std::current_exception());
+      }
   }
   /// closes a socket. Use it to release the socket descriptor. Note that the socket
-	/// descriptor may immediately be reused by the system as soon as closesocket
-	/// function is issued.
+  /// descriptor may immediately be reused by the system as soon as closesocket
+  /// function is issued.
   COASYNC_ATTRIBUTE((always_inline))
   void COASYNC_API close()
   {
     if (not is_open())   COASYNC_ATTRIBUTE((unlikely))
-		 return;
+      return;
     cancel();
 #if defined(_WIN32) || defined(_WIN64)
     if (::closesocket(native_handle()) == -1)   COASYNC_ATTRIBUTE((unlikely))
@@ -82,9 +96,9 @@ struct socket_base
 #endif
       throw std::system_error(detail::get_errno(),detail::generic_category());
     else   COASYNC_ATTRIBUTE((likely))
-		 M_sockfd = native_handle_type(-1);
+      M_sockfd = native_handle_type(-1);
   }
-	/// Sets the non-blocking mode of the socket.
+  /// Sets the non-blocking mode of the socket.
   COASYNC_ATTRIBUTE((always_inline))
   void COASYNC_API non_blocking(bool mode)
   {
@@ -100,9 +114,9 @@ struct socket_base
 
       throw std::system_error(detail::get_errno(),detail::generic_category());
     if (mode)   COASYNC_ATTRIBUTE((likely))
-		 flag |= O_NONBLOCK;
+      flag |= O_NONBLOCK;
     else   COASYNC_ATTRIBUTE((unlikely))
-		 flag &= ~O_NONBLOCK;
+      flag &= ~O_NONBLOCK;
     flag = ::fcntl(native_handle(), F_SETFL, flag);
 #endif
   }
@@ -121,7 +135,7 @@ struct socket_base
 #endif
   }
   /// used on any socket in any state. It is used to set or retrieve some operating parameters
-	/// associated with the socket, independent of the protocol and communications subsystem.
+  /// associated with the socket, independent of the protocol and communications subsystem.
   template<typename _Command, typename... _Args>
   COASYNC_ATTRIBUTE((always_inline))
   void COASYNC_API io_control(_Command&& __command, _Args&& ...__cmdargs) const
@@ -159,11 +173,11 @@ struct socket_base
 #endif
   }
   /// To accept connections, a socket is first created with the socket function and
-	/// bound to a local address with the bind function. A backlog for incoming connections
-	/// is specified with listen, and then the connections are accepted with the accept
-	/// function. Sockets that are connection oriented, those of type SOCK_STREAM for example,
-	/// are used with listen. The socket s is put into passive mode where incoming
-	/// connection requests are acknowledged and queued pending acceptance by the process.
+  /// bound to a local address with the bind function. A backlog for incoming connections
+  /// is specified with listen, and then the connections are accepted with the accept
+  /// function. Sockets that are connection oriented, those of type SOCK_STREAM for example,
+  /// are used with listen. The socket s is put into passive mode where incoming
+  /// connection requests are acknowledged and queued pending acceptance by the process.
   COASYNC_ATTRIBUTE((always_inline))
   void COASYNC_API listen(int backlog ) const
   {
@@ -172,13 +186,13 @@ struct socket_base
       throw std::system_error(detail::get_errno(),detail::generic_category());
   }
   /// Releases the ownership of the managed socket, if any.
-	/// native_handle() returns -1 after the call.
-	/// The caller is responsible for close the socket fd
+  /// native_handle() returns -1 after the call.
+  /// The caller is responsible for close the socket fd
   COASYNC_ATTRIBUTE((maybe_unused, always_inline))
   native_handle_type COASYNC_API release() noexcept
   {
     if (is_open())   COASYNC_ATTRIBUTE((likely))
-		 cancel();
+      cancel();
     return std::exchange(M_sockfd, native_handle_type(-1));
   }
 protected:
@@ -202,7 +216,7 @@ protected:
   constexpr socket_base& operator=(socket_base&& other) noexcept
   {
     if (std::addressof(other) == this)   COASYNC_ATTRIBUTE((unlikely))
-		 return (*this);
+      return (*this);
     M_context = other.M_context;
     M_sockfd = std::exchange(other.M_sockfd, native_handle_type(-1));
 #if defined(_WIN32) || defined(_WIN64)

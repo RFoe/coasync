@@ -13,20 +13,21 @@ namespace COASYNC_ATTRIBUTE((gnu::visibility("default"))) net
 {
 namespace COASYNC_ATTRIBUTE((gnu::visibility("default"))) rpc
 {
-template <typename execution_context> struct __rpc_client
+template <typename execution_context> struct basic_rpc_client
 {
 private:
-  typedef __serde_stream<execution_context> 			serde_stream;
+  typedef basic_serde_stream<execution_context> 			serde_stream;
   typedef __basic_socket<tcp, execution_context> 	socket;
 public:
   COASYNC_ATTRIBUTE((always_inline))
-  constexpr explicit __rpc_client(socket s) noexcept
+  constexpr explicit basic_rpc_client(socket s) noexcept
     : _M_stream(std::move(s)) {}
-  constexpr __rpc_client& operator=(__rpc_client const&) = delete;
-  constexpr __rpc_client(__rpc_client const&) = delete;
-  COASYNC_ATTRIBUTE((always_inline)) __rpc_client(__rpc_client&&) noexcept = default;
-  COASYNC_ATTRIBUTE((always_inline)) __rpc_client& operator=(__rpc_client&&) noexcept = default;
-  COASYNC_ATTRIBUTE((always_inline)) ~ __rpc_client() noexcept = default;
+  constexpr basic_rpc_client& operator=(basic_rpc_client const&) = delete;
+  constexpr basic_rpc_client(basic_rpc_client const&) = delete;
+  COASYNC_ATTRIBUTE((always_inline)) basic_rpc_client(basic_rpc_client&&) noexcept = default;
+  COASYNC_ATTRIBUTE((always_inline)) basic_rpc_client& operator=(basic_rpc_client&&) noexcept = default;
+  COASYNC_ATTRIBUTE((always_inline)) ~ basic_rpc_client() noexcept {
+	};
 
   template <typename R, typename... Args>
   COASYNC_ATTRIBUTE((nodiscard))
@@ -45,7 +46,7 @@ public:
 private:
   serde_stream _M_stream;
 };
-typedef __rpc_client<execution_context> rpc_client;
+typedef basic_rpc_client<execution_context> rpc_client;
 }
 }
 }
