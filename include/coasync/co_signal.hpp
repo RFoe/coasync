@@ -13,9 +13,11 @@
 
 namespace COASYNC_ATTRIBUTE((gnu::visibility("default"))) coasync
 {
+namespace COASYNC_ATTRIBUTE((gnu::visibility("default"))) detail
+{
 template <std::size_t asynchronous_tag, typename execution_context, typename Fn>
 requires std::is_invocable_r_v<void, std::decay_t<Fn>, int>
-void COASYNC_API co_signal(execution_context& context, Fn&& fn)
+void COASYNC_API co_signal_impl(execution_context& context, Fn&& fn)
 {
   return (void) co_spawn(context, []
 #if __cplusplus >= 202207L
@@ -29,10 +31,29 @@ void COASYNC_API co_signal(execution_context& context, Fn&& fn)
     co_await detail::suspendible<detail::flag_service>()(__flag);
     (void) (__fn)(static_cast<int>(asynchronous_tag));
     (void) std::signal(static_cast<int>(asynchronous_tag), __fp);
-		std::atomic_flag_clear_explicit(&detail::signal_condition<asynchronous_tag>::_S_flag, std::memory_order_release);
+    std::atomic_flag_clear_explicit(&detail::signal_condition<asynchronous_tag>::_S_flag, std::memory_order_release);
   }(std::forward<Fn>(fn)), detail::use_detach_t{});
 }
-
+}
+template <typename execution_context, typename Fn>
+void COASYNC_API co_signal(execution_context& context, int signum, Fn&& callback) noexcept(false)
+{
+  switch (signum)
+    {
+    case SIGABRT: COASYNC_ATTRIBUTE((likely))
+      return (void) detail::co_signal_impl<SIGABRT>(context, std::forward<Fn>(callback));
+    case SIGFPE: COASYNC_ATTRIBUTE((unlikely))
+      return (void) detail::co_signal_impl<SIGILL>(context, std::forward<Fn>(callback));
+    case SIGINT: COASYNC_ATTRIBUTE((likely))
+      return (void) detail::co_signal_impl<SIGINT>(context, std::forward<Fn>(callback));
+    case SIGSEGV: COASYNC_ATTRIBUTE((likely))
+      return (void) detail::co_signal_impl<SIGSEGV>(context, std::forward<Fn>(callback));
+    case SIGTERM: COASYNC_ATTRIBUTE((likely))
+      return (void) detail::co_signal_impl<SIGTERM>(context, std::forward<Fn>(callback));
+    default: COASYNC_ATTRIBUTE((unlikely))
+    	throw std::invalid_argument("co_signal: unsurported signal type");
+    }
+}
 }
 
 #endif

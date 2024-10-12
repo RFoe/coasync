@@ -5,12 +5,12 @@
 # pragma once
 #endif // defined(_MSC_VER) && (_MSC_VER >= 1200)
 
-#include "../../async_fn.hpp"
-#include "../../co_spawn.hpp"
-#include "../../detail/get_context.hpp"
-#include "../serde_stream.hpp"
-#include "../protocol.hpp"
-#include "../endpoint.hpp"
+#include "../async_fn.hpp"
+#include "../co_spawn.hpp"
+#include "../detail/get_context.hpp"
+#include "../net/serde_stream.hpp"
+#include "../net/protocol.hpp"
+#include "../net/endpoint.hpp"
 #include <unordered_map>
 
 namespace COASYNC_ATTRIBUTE((gnu::visibility("default"))) coasync

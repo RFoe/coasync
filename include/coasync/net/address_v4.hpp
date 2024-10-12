@@ -48,7 +48,7 @@ namespace COASYNC_ATTRIBUTE((gnu::visibility("default"))) net
 {
 /// Implements IP version 4 style addresses.
 /// The ip::address_v4 class provides the ability to use and manipulate IP version 4 addresses.
-struct address_v4
+struct COASYNC_ATTRIBUTE((nodiscard)) address_v4
 {
   typedef std::uint_least32_t uint_type;
   /// The type used to represent an address as an unsigned integer.
@@ -56,7 +56,8 @@ struct address_v4
   {
   	/// The type used to represent an address as an array of bytes.
     template <std::integral... Ts>
-    constexpr explicit bytes_type(Ts... ts) noexcept
+    COASYNC_ATTRIBUTE((always_inline))
+		constexpr explicit bytes_type(Ts... ts) noexcept
       : std::array<unsigned char, sizeof(uint_type)>
     {
       static_cast<unsigned char>(ts) ...

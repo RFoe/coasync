@@ -30,11 +30,19 @@ const std::error_category& cancellation_category() noexcept
 {
 struct COASYNC_ATTRIBUTE((nodiscard)) __category final: public std::error_category
   {
-    COASYNC_ATTRIBUTE((nodiscard, always_inline)) virtual const char* name() const noexcept
+    COASYNC_ATTRIBUTE((nodiscard, always_inline))
+#if defined(__cpp_constexpr) && __cplusplus >=201907L
+	constexpr
+#endif
+		virtual const char* name() const noexcept
   {
     return "cancellation";
   }
-  COASYNC_ATTRIBUTE((nodiscard, always_inline)) virtual std::string message(int errc) const override
+  COASYNC_ATTRIBUTE((nodiscard, always_inline))
+#if defined(__cpp_constexpr) && __cplusplus >=201907L
+	constexpr
+#endif
+	virtual std::string message(int errc) const override
   {
     switch (errc)
       {
@@ -78,9 +86,16 @@ public:
     : cancellation_error(std::make_error_code(std::errc(static_cast<int>(__errc))))
   {}
 
-  COASYNC_ATTRIBUTE((always_inline)) virtual ~cancellation_error() noexcept {}
+  COASYNC_ATTRIBUTE((always_inline))
+#if defined(__cpp_constexpr) && __cplusplus >=201907L
+ /*constexpr*/
+#endif
+	virtual ~cancellation_error() noexcept {}
 
   COASYNC_ATTRIBUTE((nodiscard, always_inline))
+#if defined(__cpp_constexpr) && __cplusplus >=201907L
+ /*constexpr*/
+#endif
   virtual const char* what() const noexcept
   {
   	auto errc = static_cast<std::underlying_type_t<std::errc>>(_M_code.value());

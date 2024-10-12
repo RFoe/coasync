@@ -5,7 +5,7 @@
 # pragma once
 #endif // defined(_MSC_VER) && (_MSC_VER >= 1200)
 
-#include "../serde_stream.hpp"
+#include "../net/serde_stream.hpp"
 
 namespace COASYNC_ATTRIBUTE((gnu::visibility("default"))) coasync
 {

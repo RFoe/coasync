@@ -35,19 +35,19 @@ std::error_category const& COASYNC_API resolver_category() noexcept
 {
 /// specified error category to build an system_error
 #if defined(__linux__)
-  struct category_t : std::error_category
+struct COASYNC_ATTRIBUTE((nodiscard)) category_t : std::error_category
   {
     COASYNC_ATTRIBUTE((nodiscard, always_inline))
     const char* name() const noexcept
-    {
-      return "resolver";
-    }
-    COASYNC_ATTRIBUTE((nodiscard, always_inline))
-    std::string message(int __e) const
-    {
-      /// ::gai_strerror in WINDOWS is not surported
-      return ::gai_strerror(__e);
-    }
+  {
+    return "resolver";
+  }
+  COASYNC_ATTRIBUTE((nodiscard, always_inline))
+  std::string message(int __e) const
+  {
+    /// ::gai_strerror in WINDOWS is not surported
+    return ::gai_strerror(__e);
+  }
   };
   static category_t category;
   return category;
@@ -74,7 +74,7 @@ std::error_condition COASYNC_API make_error_condition(resolver_errc __e) noexcep
   return std::error_condition(static_cast<int>(__e), resolver_category());
 }
 template <typename Protocol>
-struct basic_resolver_entry
+struct COASYNC_ATTRIBUTE((nodiscard)) basic_resolver_entry
 {
   typedef Protocol 											procotol_type;
   typedef typename Protocol::endpoint 	endpoint_type;
@@ -202,6 +202,16 @@ struct basic_resolver_results: std::ranges::view_interface<basic_resolver_result
   {
     return !(a == b);
   }
+  COASYNC_ATTRIBUTE((always_inline))
+  basic_resolver_results(basic_resolver_results const&) = default;
+  COASYNC_ATTRIBUTE((always_inline))
+  basic_resolver_results& operator=(basic_resolver_results const&) = default;
+  COASYNC_ATTRIBUTE((always_inline))
+  basic_resolver_results(basic_resolver_results&&) = default;
+  COASYNC_ATTRIBUTE((always_inline))
+  basic_resolver_results& operator=(basic_resolver_results&&) = default;
+  COASYNC_ATTRIBUTE((always_inline))
+  ~ basic_resolver_results() = default;
 private:
   template <typename OtherProtocol, typename execution_context>
   friend struct __basic_resolver;
@@ -217,8 +227,8 @@ private:
 template <typename Protocol, typename execution_context>
 struct __basic_resolver
 {
-	///Asynchronous domain name resolution is achieved by submitting concurrent tasks with co spawn,
-	/// which is blocked synchronously if the associated scheduler is single-threaded
+  ///Asynchronous domain name resolution is achieved by submitting concurrent tasks with co spawn,
+  /// which is blocked synchronously if the associated scheduler is single-threaded
   typedef execution_context 								context_type;
   typedef Protocol 													protocol_type;
   typedef Protocol::endpoint 								endpoint_type;
@@ -242,6 +252,7 @@ struct __basic_resolver
   {
     return resolve(std::move(protocol), std::move(host), std::move(service), resolver_flags(0), CompletionToken());
   }
+
   template <typename CompletionToken>
   COASYNC_ATTRIBUTE((nodiscard))
   auto COASYNC_API resolve(
@@ -292,7 +303,11 @@ struct __basic_resolver
   )
   {
     return co_spawn(_M_context,
-                    [](
+                    []
+#if __cplusplus >= 202207L
+                    COASYNC_ATTRIBUTE((nodiscard))
+#endif
+                    (
                       std::string 					host,
                       std::string 					service,
                       resolver_flags 				flags
@@ -312,7 +327,11 @@ struct __basic_resolver
   )
   {
     return co_spawn(_M_context,
-                    [](
+                    []
+#if __cplusplus >= 202207L
+                    COASYNC_ATTRIBUTE((nodiscard))
+#endif
+                    (
                       endpoint_type endpoint
                     ) -> awaitable<results_type>
     {
@@ -334,7 +353,7 @@ struct __basic_resolver
   COASYNC_ATTRIBUTE((always_inline))
   ~ __basic_resolver() = default;
 private:
-  execution_context& _M_context;
+  COASYNC_ATTRIBUTE((no_unique_address)) execution_context& _M_context;
 };
 template <typename Protocol>
 using basic_resolver = __basic_resolver<execution_context, Protocol>;
@@ -378,16 +397,16 @@ basic_resolver_results<Protocol>::basic_resolver_results(
     ::addrinfo* _M_p = nullptr;
   } sai;
   /// the ANSI version of a function that provides protocol-independent translation
-	/// from host name to address.
-	/// The getaddrinfo function returns results for the NS_DNS namespace. The getaddrinfo
-	/// function aggregates all responses if more than one namespace provider returns
-	/// information. For use with the IPv6 and IPv4 protocol, name resolution can be
-	/// by the Domain Name System (DNS), a local hosts file, or by other naming mechanisms
-	/// for the NS_DNS namespace.The getaddrinfo function returns results for the
-	/// NS_DNS namespace. The getaddrinfo function aggregates all responses if more
-	/// than one namespace provider returns information. For use with the IPv6 and
-	/// IPv4 protocol, name resolution can be by the Domain Name System (DNS), a local
-	/// hosts file, or by other naming mechanisms for the NS_DNS namespace.
+  /// from host name to address.
+  /// The getaddrinfo function returns results for the NS_DNS namespace. The getaddrinfo
+  /// function aggregates all responses if more than one namespace provider returns
+  /// information. For use with the IPv6 and IPv4 protocol, name resolution can be
+  /// by the Domain Name System (DNS), a local hosts file, or by other naming mechanisms
+  /// for the NS_DNS namespace.The getaddrinfo function returns results for the
+  /// NS_DNS namespace. The getaddrinfo function aggregates all responses if more
+  /// than one namespace provider returns information. For use with the IPv6 and
+  /// IPv4 protocol, name resolution can be by the Domain Name System (DNS), a local
+  /// hosts file, or by other naming mechanisms for the NS_DNS namespace.
   if (int __err = ::getaddrinfo(host_view, service_view, &hints, &sai._M_p))
     throw std::system_error(__err, resolver_category());
   auto tail = _M_results.before_begin();
@@ -431,14 +450,14 @@ basic_resolver_results<_InternetProtocol>::basic_resolver_results(endpoint_type 
                           ? sizeof(::sockaddr_in)
                           : sizeof(::sockaddr_in6);
   /// ANSI version of a function that provides protocol-independent name resolution. The getnameinfo
-	/// function is used to translate the contents of a socket address structure to a node name and/or
-	/// a service name.
-	/// For IPv6 and IPv4 protocols, Name resolution can be by the Domain Name System (DNS), a local
-	/// hosts file, or by other naming mechanisms. This function can be used to determine the host
-	/// dname for an IPv4 or IPv6 address, a reverse DNS lookup, or determine the service name for a
-	/// port number. The getnameinfo function can also be used to convert an IP address or a port
-	/// number in a sockaddr structure to an ANSI string. This function can also be used to determine
-	/// the IP address for a host name.
+  /// function is used to translate the contents of a socket address structure to a node name and/or
+  /// a service name.
+  /// For IPv6 and IPv4 protocols, Name resolution can be by the Domain Name System (DNS), a local
+  /// hosts file, or by other naming mechanisms. This function can be used to determine the host
+  /// dname for an IPv4 or IPv6 address, a reverse DNS lookup, or determine the service name for a
+  /// port number. The getnameinfo function can also be used to convert an IP address or a port
+  /// number in a sockaddr structure to an ANSI string. This function can also be used to determine
+  /// the IP address for a host name.
   int __err = ::getnameinfo(__sockaddr, __addrlen,
                             host_name, sizeof(host_name),
                             service_name, sizeof(service_name),

@@ -17,14 +17,15 @@ awaitable<void> do_raise(int seconds) noexcept
 int main()
 {
   execution_context context {concurrency_arg(0)};
-  co_signal<SIGINT>(context, []
+  co_signal(context, SIGINT, []
   ([[maybe_unused]]int) noexcept {
     std::puts("interpreted!!! callback 001");
   });
-  co_signal<SIGINT>(context, []
+  co_signal(context, SIGINT, []
   ([[maybe_unused]]int) noexcept {
     std::puts("interpreted!!! callback 002");
   });
+  
   co_spawn(context, do_raise(1), use_detach);
   co_spawn(context, do_raise(2), use_detach);
   context.loop();

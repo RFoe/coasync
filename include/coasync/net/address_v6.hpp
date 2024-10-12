@@ -31,7 +31,7 @@ namespace COASYNC_ATTRIBUTE((gnu::visibility("default"))) net
 {
 /// Implements IP version 6 style addresses.
 /// The ip::address_v6 class provides the ability to use and manipulate IP version 6 addresses.
-struct address_v6
+struct COASYNC_ATTRIBUTE((nodiscard)) address_v6
 {
 	/// The scope ID type of address.
   typedef coasync::net::scope_id_type scope_id_type;
@@ -39,7 +39,8 @@ struct address_v6
   struct bytes_type: public std::array<unsigned char, 16>
   {
     template <std::integral... Ts>
-    constexpr explicit bytes_type(Ts... ts) noexcept : std::array<unsigned char, 16>
+    COASYNC_ATTRIBUTE((always_inline))
+		constexpr explicit bytes_type(Ts... ts) noexcept : std::array<unsigned char, 16>
     {
       static_cast<unsigned char>(ts) ...
     }
