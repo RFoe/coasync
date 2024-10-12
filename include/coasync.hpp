@@ -12,8 +12,10 @@
 #include "coasync/co_condition_variable.hpp"
 #include "coasync/co_latch.hpp"
 #include "coasync/co_semaphore.hpp"
+
 #include "coasync/async_fn.hpp"
 #include "coasync/awaitable.hpp"
+#include "coasync/generator.hpp"
 #include "coasync/channel.hpp"
 #include "coasync/execution_context.hpp"
 #include "coasync/functional.hpp"
@@ -21,6 +23,8 @@
 #include "coasync/this_coro.hpp"
 #include "coasync/when_all.hpp"
 #include "coasync/when_any.hpp"
+#include "coasync/deadline_timer.hpp"
+
 #include "coasync/net/acceptor.hpp"
 #include "coasync/net/address.hpp"
 #include "coasync/net/address_v4.hpp"
@@ -40,6 +44,10 @@
 #include "coasync/net/serde_stream.hpp"
 #include "coasync/net/socket.hpp"
 #include "coasync/net/socket_base.hpp"
-#include "coasync/net/rpc/rpc_client.hpp"
-#include "coasync/net/rpc/rpc_server.hpp"
+#include "coasync/net/network_v4.hpp"
+#include "coasync/net/network_v6.hpp"
+
+#include "coasync/rpc/rpc_client.hpp"
+#include "coasync/rpc/rpc_server.hpp"
+
 #endif

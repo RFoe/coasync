@@ -49,7 +49,7 @@ struct __basic_socket: socket_base<execution_context>
   typedef Protocol::endpoint::address_v6_type address_v6_type;
   typedef Protocol::endpoint::port_type 			port_type;
   /// owns and manages a tcp/upd socket through native fd handle
-	/// and disposes/closes of that socket when the unique_ptr goes out of scope.
+  /// and disposes/closes of that socket when the unique_ptr goes out of scope.
   constexpr __basic_socket& operator=(__basic_socket const&) = delete;
   COASYNC_ATTRIBUTE((nodiscard, always_inline))
   protocol_type COASYNC_API protocol() const noexcept
@@ -57,10 +57,10 @@ struct __basic_socket: socket_base<execution_context>
     return M_protocol;
   }
   /// sets the current value for a socket option associated with a socket of any type,
-	/// in any state. Although options can exist at multiple protocol levels, they
-	/// are always present at the uppermost socket level. Options affect socket operations,
-	/// such as whether expedited data (OOB data for example) is received in the
-	/// normal data stream, and whether broadcast messages can be sent on the socket.
+  /// in any state. Although options can exist at multiple protocol levels, they
+  /// are always present at the uppermost socket level. Options affect socket operations,
+  /// such as whether expedited data (OOB data for example) is received in the
+  /// normal data stream, and whether broadcast messages can be sent on the socket.
   template <typename Option>
   COASYNC_ATTRIBUTE((always_inline))
   void COASYNC_API set_option(Option const& option) const
@@ -75,10 +75,10 @@ struct __basic_socket: socket_base<execution_context>
       throw std::system_error(detail::get_errno(),detail::generic_category());
   }
   /// retrieves the current value for a socket option associated with a socket
-	/// of any type, in any state, and stores the result in optval. Options can
-	/// exist at multiple protocol levels, but they are always present at the
-	/// uppermost socket level. Options affect socket operations, such as the packet
-	/// routing and OOB data transfer.
+  /// of any type, in any state, and stores the result in optval. Options can
+  /// exist at multiple protocol levels, but they are always present at the
+  /// uppermost socket level. Options affect socket operations, such as the packet
+  /// routing and OOB data transfer.
   template <typename Option>
   COASYNC_ATTRIBUTE((always_inline))
   void COASYNC_API get_option(Option& option) const
@@ -94,7 +94,7 @@ struct __basic_socket: socket_base<execution_context>
       throw std::system_error(detail::get_errno(), detail::generic_category());
   }
   /// causes a socket descriptor and any related resources to be allocated and
-	/// bound to a specific transport-service provider.
+  /// bound to a specific transport-service provider.
   COASYNC_ATTRIBUTE((always_inline))
   void COASYNC_API open(protocol_type const& proto = protocol_type::v4())
   {
@@ -114,12 +114,12 @@ struct __basic_socket: socket_base<execution_context>
     M_sockfd =  	sockfd;
   }
   /// required on an unconnected socket before subsequent calls to the listen
-	/// function. It is normally used to bind to either connection-oriented (stream)
-	/// or connectionless (datagram) sockets. The bind function may also be used
-	/// to bind to a raw socket (the socket was created by calling the socket
-	/// function with the type parameter set to SOCK_RAW). The bind function may
-	/// also be used on an unconnected socket before subsequent calls to the connect
-	/// before send operation
+  /// function. It is normally used to bind to either connection-oriented (stream)
+  /// or connectionless (datagram) sockets. The bind function may also be used
+  /// to bind to a raw socket (the socket was created by calling the socket
+  /// function with the type parameter set to SOCK_RAW). The bind function may
+  /// also be used on an unconnected socket before subsequent calls to the connect
+  /// before send operation
   COASYNC_ATTRIBUTE((always_inline))
   void COASYNC_API bind(endpoint_type const& ep) const
   {
@@ -198,9 +198,9 @@ struct __basic_socket: socket_base<execution_context>
       }
   }
   /// create a connection to the specified destination. If socket s, is unbound,
-	/// unique values are assigned to the local association by the system, and the
-	/// socket is marked as bound. For connection-oriented sockets (for example,
-	/// type SOCK_STREAM), an active connection is initiated to the foreign host
+  /// unique values are assigned to the local association by the system, and the
+  /// socket is marked as bound. For connection-oriented sockets (for example,
+  /// type SOCK_STREAM), an active connection is initiated to the foreign host
   COASYNC_ATTRIBUTE((nodiscard))
   awaitable<void> COASYNC_API connect(endpoint_type const& ep)
   {
@@ -209,8 +209,8 @@ struct __basic_socket: socket_base<execution_context>
     if(not is_open())   COASYNC_ATTRIBUTE((unlikely)) open();
     bool previous_non_blocking = non_blocking();
     non_blocking(true);
-    ::sockaddr_in 	__sockaddr;
-    ::sockaddr_in6 	__sockaddr6;
+    COASYNC_ATTRIBUTE((gnu::uninitialized)) ::sockaddr_in 	__sockaddr;
+    COASYNC_ATTRIBUTE((gnu::uninitialized)) ::sockaddr_in6 	__sockaddr6;
     if(protocol() == protocol_type::v4())   COASYNC_ATTRIBUTE((likely))
       __sockaddr = ep.to_sockaddr_in();
     else   COASYNC_ATTRIBUTE((unlikely))
@@ -220,6 +220,7 @@ struct __basic_socket: socket_base<execution_context>
     ::socklen_t const addr_len = protocol() == protocol_type::v4()
                                  ? sizeof(sockaddr_in) : sizeof(sockaddr_in6);
     int retval = ::connect(native_handle(), peer_addr, addr_len );
+    std::puts("set non-blocking, and connect return immediately");
     if (retval >= 0)   COASYNC_ATTRIBUTE((unlikely))
       {
         non_blocking(previous_non_blocking);
@@ -229,16 +230,20 @@ struct __basic_socket: socket_base<execution_context>
         and detail::get_errno() != get_error_code(EWOULDBLOCK)
         and detail::get_errno() != get_error_code(EINTR))   COASYNC_ATTRIBUTE((unlikely))
       throw std::system_error(detail::get_errno(),detail::generic_category());
+    std::puts("socketout_service post and block here");
     co_await detail::related_suspendible<detail::socketout_service>(context())(native_handle());
+    std::puts("socketout_service commit and frame resumed");
     socket_option::error err;
     get_option(err);
     if (int ec = err.get())   COASYNC_ATTRIBUTE((unlikely))
       throw std::system_error(ec, detail::generic_category());
+    non_blocking(previous_non_blocking);
+    co_return;
   }
 public:
-	/// read incoming data on connection-oriented sockets, or connectionless sockets.
-	/// When using a connection-oriented protocol, the sockets must be connected before
-	/// calling receive.
+  /// read incoming data on connection-oriented sockets, or connectionless sockets.
+  /// When using a connection-oriented protocol, the sockets must be connected before
+  /// calling receive.
   template <buffer_constrait Rng>
   COASYNC_ATTRIBUTE((nodiscard))
   awaitable<int> COASYNC_API receive(Rng& buffer, message_flags flag = message_flags(0))
@@ -278,7 +283,7 @@ public:
     non_blocking(true);
     while(true)
       {
-        int transferred = ::send(native_handle(), const_cast<char *>(std::ranges::data(buffer)),
+        int transferred = ::send(native_handle(), const_cast<char*>(std::ranges::data(buffer)),
                                  std::ranges::size(buffer), static_cast<int>(flag));
         if(transferred >= 0)   COASYNC_ATTRIBUTE((unlikely))
           {
@@ -297,11 +302,11 @@ public:
       }
   }
   /// reads incoming data on both connected and unconnected sockets and captures the
-	/// address from which the data was sent. This function is typically used with
-	/// connectionless sockets. The local address of the socket must be known. For server
-	/// applications, this is usually done explicitly through bind. Explicit binding
-	/// is discouraged for client applications. For client applications using this
-	/// function, the socket can become bound implicitly to a local address through send_to,
+  /// address from which the data was sent. This function is typically used with
+  /// connectionless sockets. The local address of the socket must be known. For server
+  /// applications, this is usually done explicitly through bind. Explicit binding
+  /// is discouraged for client applications. For client applications using this
+  /// function, the socket can become bound implicitly to a local address through send_to,
   template <buffer_constrait Rng>
   COASYNC_ATTRIBUTE((nodiscard))
   awaitable<std::pair<int, endpoint_type>> COASYNC_API receive_from(Rng& buffer, int length, message_flags flag = message_flags(0))
@@ -310,8 +315,8 @@ public:
 //    assert(&context() == &(co_await detail::get_context()));
     bool previous_non_blocking = non_blocking();
     non_blocking(true);
-    ::sockaddr_in 		__sockaddr;
-    ::sockaddr_in6 		__sockaddr6;
+    COASYNC_ATTRIBUTE((gnu::uninitialized)) ::sockaddr_in 		__sockaddr;
+    COASYNC_ATTRIBUTE((gnu::uninitialized)) ::sockaddr_in6 		__sockaddr6;
     while(true)
       {
         ::sockaddr const* to_sockaddr = protocol() == protocol_type::v4()
@@ -341,9 +346,9 @@ public:
       }
   }
   ///  write outgoing data on a socket. For message-oriented sockets, care must be
-	/// taken not to exceed the maximum packet size of the underlying subnets, which
-	/// can be obtained by using get_option to retrieve the value of socket option
-	/// max_message_size
+  /// taken not to exceed the maximum packet size of the underlying subnets, which
+  /// can be obtained by using get_option to retrieve the value of socket option
+  /// max_message_size
   template <buffer_constrait Rng>
   COASYNC_ATTRIBUTE((nodiscard))
   awaitable<int> COASYNC_API send_to(Rng& buffer, int length, endpoint_type const& ep, message_flags flag = message_flags(0))
@@ -353,8 +358,8 @@ public:
 //    assert(&context() == &(co_await detail::get_context()));
     bool previous_non_blocking = non_blocking();
     non_blocking(true);
-    ::sockaddr_in 		__sockaddr;
-    ::sockaddr_in6 		__sockaddr6;
+    COASYNC_ATTRIBUTE((gnu::uninitialized)) ::sockaddr_in 		__sockaddr;
+    COASYNC_ATTRIBUTE((gnu::uninitialized)) ::sockaddr_in6 		__sockaddr6;
     if(protocol() == protocol_type::v4())   COASYNC_ATTRIBUTE((likely))
       __sockaddr = ep.to_sockaddr_in();
     else   COASYNC_ATTRIBUTE((unlikely))

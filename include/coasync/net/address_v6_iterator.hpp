@@ -1,5 +1,5 @@
-#ifndef __COASYNC_ADDRESS_V4_ITERATOR_INCLUDED
-#define __COASYNC_ADDRESS_V4_ITERATOR_INCLUDED
+#ifndef __COASYNC_ADDRESS_V6_ITERATOR_INCLUDED
+#define __COASYNC_ADDRESS_V6_ITERATOR_INCLUDED
 #include "address_v6.hpp"
 #include <ranges>
 namespace COASYNC_ATTRIBUTE((gnu::visibility("default"))) coasync

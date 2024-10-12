@@ -7,12 +7,18 @@
 #include "../../include/coasync/functional.hpp"
 #include "../../include/coasync/this_coro.hpp"
 #include <iostream>
+
+bool ignore_case_equal(char a, char b)
+{
+  return std::tolower(a) == std::tolower(b);
+}
+
 using namespace coasync;
 awaitable<void> connetion(net::tcp::socket client) noexcept
 {
   std::puts("hello client");
   while(true)
-      std::cout << co_await net::receive_at_least(client, 8) << "\n";
+    std::cout << co_await net::receive_until(client, "fuck", ignore_case_equal) << "\n";
 }
 awaitable<void> acceptance() noexcept
 {
@@ -21,10 +27,11 @@ awaitable<void> acceptance() noexcept
     co_await this_coro::context,
     net::tcp::endpoint(net::address_v4::loopback(), 10086)
   };
-  while(true) {
-		std::puts("new client found");
-    co_spawn(co_await this_coro::context, connetion(co_await acceptor.accept()), use_detach);
-	}
+  while(true)
+    {
+      co_spawn(co_await this_coro::context, connetion(co_await acceptor.accept()), use_detach);
+      std::puts("new client found");
+    }
 }
 int main()
 {
