@@ -10,6 +10,7 @@
 #include "detail/object_deduce.hpp"
 #include "set_stop_source.hpp"
 #include "co_spawn.hpp"
+#include "awaitable_group.hpp"
 #include <variant>
 
 namespace COASYNC_ATTRIBUTE((gnu::visibility("default"))) coasync
@@ -75,6 +76,31 @@ awaitable<std::variant< detail::object_deduce_t<RefTypes> ...>>
     and (desired_value.construct(std::in_place_index<Indices>, std::move(std::get<Indices>(candidates).get())), false)), ...);
   co_return std::move(desired_value.get());
 }
+template <typename Ref, typename Alloc>
+COASYNC_ATTRIBUTE((nodiscard))
+awaitable<detail::object_deduce_t<Ref>>
+                                     COASYNC_API when_any_impl(awaitable_group<Ref, Alloc> agroup)
+{
+  std::shared_ptr<std::atomic_flag> 	flag_arrive = std::make_shared<std::atomic_flag>();
+  std::stop_source 										ssource;
+  std::exception_ptr 									first_eptr {};
+  std::atomic_size_t 									first_arrive {std::size_t(-1)};
+  execution_context& 									context = co_await detail::get_context();
+  detail::manual_lifetime<detail::object_deduce_t<Ref>> desired_value;
+  flag_arrive -> clear();
+  for(awaitable<Ref, Alloc>& a: agroup)
+    co_spawn(
+      context,
+      when_any_wrapper(std::move(a), flag_arrive, 0, desired_value, first_arrive, first_eptr),
+      detail::use_detach_t());
+  co_await detail::suspendible<detail::flag_service>()(* flag_arrive);
+  ssource.request_stop();
+  while(first_arrive.load(std::memory_order_acquire) == std::size_t(-1))
+    std::this_thread::yield();
+  if(first_eptr) COASYNC_ATTRIBUTE((unlikely))
+    std::rethrow_exception(std::move(first_eptr));
+  co_return std::move(desired_value.get());
+}
 }
 /// Create a awaitable object that becomes ready when at least one of the input awaitables become ready.
 /// The behavior is undefined if any awaitable future is invalid.
@@ -84,6 +110,12 @@ awaitable<std::variant< detail::object_deduce_t<RefTypes> ...>>
     COASYNC_API when_any(awaitable<RefTypes, AllocTypes>... aargs)
 {
   return detail::when_any_impl(std::make_index_sequence<sizeof...(RefTypes)>(), std::move(aargs) ...);
+}
+template <typename Ref, typename Alloc>
+COASYNC_ATTRIBUTE((nodiscard))
+awaitable<detail::object_deduce_t<Ref>> COASYNC_API when_any(awaitable_group<Ref, Alloc> agroup)
+{
+  return detail::when_any_impl(std::move(agroup));
 }
 }
 #endif

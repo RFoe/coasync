@@ -9,6 +9,7 @@
 #include "detail/suspendible.hpp"
 #include "detail/object_deduce.hpp"
 #include "co_spawn.hpp"
+#include "awaitable_group.hpp"
 #include <vector>
 
 namespace COASYNC_ATTRIBUTE((gnu::visibility("default"))) coasync
@@ -55,6 +56,32 @@ awaitable<std::tuple<object_deduce_t<RefTypes> ...>>
     std::rethrow_exception(std::make_exception_ptr(std::move(eptr_collection)));
   co_return std::make_tuple(std::move(std::get<Indices>(values).get()) ...);
 }
+template <typename Ref, typename Alloc>
+COASYNC_ATTRIBUTE((nodiscard))
+awaitable<std::vector<detail::object_deduce_t<Ref>>> COASYNC_API when_all_impl(awaitable_group<Ref, Alloc> group)
+{
+  std::latch 											local_latch { static_cast<std::ptrdiff_t>(group.size()) };
+  std::vector<manual_lifetime<detail::object_deduce_t<Ref>>> value_collection;
+  std::vector<detail::object_deduce_t<Ref>> values;
+  std::vector<std::exception_ptr> eptr_collection;
+  basic_lockable 									eptr_lockable;
+  execution_context&       				context = co_await get_context();
+  value_collection.resize(group.size());
+  values.reserve(group.size());
+  eptr_collection.reserve(group.size());
+  for(std::size_t index {}; index < group.size(); index ++)
+    co_spawn(
+      context,
+      when_all_wrapper(std::move(group[index]), local_latch, value_collection[index], eptr_collection, eptr_lockable),
+      detail::use_detach_t());
+  co_await suspendible<latch_service>()(local_latch);
+  if(not eptr_collection.empty()) COASYNC_ATTRIBUTE((unlikely))
+    std::rethrow_exception(std::make_exception_ptr(std::move(eptr_collection)));
+
+  for(manual_lifetime<detail::object_deduce_t<Ref>>& manual: value_collection)
+    values.emplace_back(std::move(manual.get()));
+  co_return std::move(values);
+}
 }
 /// Create a awaitable object that becomes ready when all of the input awaitables become ready.
 /// The behavior is undefined if any input awaitable is invalid.
@@ -64,6 +91,12 @@ awaitable<std::tuple<detail::object_deduce_t<RefTypes> ...>>
     COASYNC_API when_all(awaitable<RefTypes, AllocTypes> ...aargs)
 {
   return detail::when_all_impl(std::make_index_sequence<sizeof...(RefTypes)>(), std::move(aargs) ...);
+}
+template <typename Ref, typename Alloc>
+COASYNC_ATTRIBUTE((nodiscard))
+awaitable<std::vector<detail::object_deduce_t<Ref>>> COASYNC_API when_all(awaitable_group<Ref, Alloc> group)
+{
+  return detail::when_all_impl(std::move(group));
 }
 }
 #endif

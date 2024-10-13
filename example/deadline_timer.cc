@@ -9,13 +9,15 @@ using std::chrono::operator""s;
 
 awaitable<void> expire(deadline_timer<>& timer)
 {
- co_await timer.wait();
- std::puts("wait done or cancel");
+ auto result = co_await timer.wait();
+ if(result == deadline_timer_status::timeout)
+ 	std::puts("wait done");
+ else
+ 	std::puts("wait cancel");
 }
 awaitable<void> cancel(deadline_timer<>& timer) {
-	co_await sleep_for(3s);
+	co_await sleep_for(1s);
 	timer.cancel();
-	std::puts("cancel");
 }
 
 int main() {

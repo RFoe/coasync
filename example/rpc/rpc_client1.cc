@@ -13,6 +13,7 @@ awaitable<void> test() noexcept
   co_await socket.connect(net::tcp::endpoint{net::address_v4::loopback(), 10086});
   std::puts("connected");
   net::rpc::rpc_client s { std::move(socket) };
+  co_await s.call<void>("sleep", 2); // server sleep 2s
   std::printf("[888 + 999 = %d]\n", co_await s.call<int>("add", 888, 999));
 }
 

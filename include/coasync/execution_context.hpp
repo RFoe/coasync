@@ -18,11 +18,21 @@ enum class COASYNC_ATTRIBUTE((nodiscard)) concurrency_arg
 struct execution_context
 {
   COASYNC_ATTRIBUTE((always_inline))
-	explicit execution_context(concurrency_arg conc = concurrency_arg(std::thread::hardware_concurrency())) noexcept
-    :_M_executor((unsigned int)(conc)), _M_lifetime(static_cast<bool>((unsigned int)(conc) == 0)) {}
+  explicit execution_context(concurrency_arg conc = concurrency_arg(std::thread::hardware_concurrency())) noexcept
+    :_M_executor((unsigned int)(conc)), _M_lifetime(static_cast<bool>((unsigned int)(conc) == 0))
+  {
+    if(concurrency() == 0) COASYNC_ATTRIBUTE((likely))
+      std::construct_at(&_UnM_unsync_pool_resource);
+    else  COASYNC_ATTRIBUTE((unlikely))
+      std::construct_at(&_UnM_sync_pool_resource);
+  }
   COASYNC_ATTRIBUTE((always_inline))~ execution_context() noexcept
   {
     erase_after(&_M_registry, *this);
+    if(concurrency() == 0) COASYNC_ATTRIBUTE((likely))
+      std::destroy_at(&_UnM_unsync_pool_resource);
+    else  COASYNC_ATTRIBUTE((unlikely))
+      std::destroy_at(&_UnM_sync_pool_resource);
   }
   /// Starts blocking polling and drives the event loop
   COASYNC_ATTRIBUTE((always_inline))
@@ -79,7 +89,9 @@ private:
   COASYNC_ATTRIBUTE((nodiscard, always_inline))
   std::pmr::memory_resource* memory_resource() noexcept
   {
-    return &_M_pool_resource;
+    return concurrency() == 0 ?
+           static_cast<std::pmr::memory_resource*>(std::addressof(_UnM_unsync_pool_resource)) :
+           static_cast<std::pmr::memory_resource*>(std::addressof(_UnM_sync_pool_resource));
   }
   detail::frame_executor   	_M_executor;
   detail::frame_lifetime   	_M_lifetime;
@@ -90,7 +102,11 @@ private:
   COASYNC_ATTRIBUTE((no_unique_address)) detail::windows_initiate
   _M_windows;
   std::atomic_long       		_M_counter;
-  std::pmr::synchronized_pool_resource _M_pool_resource;
+  union
+  {
+    std::pmr::unsynchronized_pool_resource 	_UnM_unsync_pool_resource;
+    std::pmr::synchronized_pool_resource 		_UnM_sync_pool_resource;
+  };
 };
 }
 #endif

@@ -26,6 +26,12 @@ using elements_of = std::ranges::elements_of;
 
 namespace COASYNC_ATTRIBUTE((gnu::visibility("default"))) coasync
 {
+namespace COASYNC_ATTRIBUTE((gnu::visibility("default"))) detail
+{
+template <typename Allocator>
+using generator_frame_alloc
+  = detail::awaitable_frame_alloc<Allocator>;
+}
 struct use_allocator_arg {};
 namespace COASYNC_ATTRIBUTE((gnu::visibility("default"))) ranges
 {
@@ -252,7 +258,7 @@ struct __generator_promise;
 template<typename _Ref, typename _Value, typename _Alloc, typename _ByteAllocator, bool _ExplicitAllocator>
 struct __generator_promise<generator<_Ref, _Value, _Alloc>, _ByteAllocator, _ExplicitAllocator> final
   : public generator_promise_base<_Ref>
-  , public detail::awaitable_frame_alloc<_ByteAllocator>
+  , public detail::generator_frame_alloc<_ByteAllocator>
 {
   __generator_promise() noexcept
     : generator_promise_base<_Ref>(std::coroutine_handle<__generator_promise>::from_promise(*this))
@@ -440,12 +446,12 @@ public:
   {
   }
 
- COASYNC_ATTRIBUTE((always_inline))  ~generator() noexcept
+  COASYNC_ATTRIBUTE((always_inline))  ~generator() noexcept
   {
     if (__coro_) COASYNC_ATTRIBUTE((likely))
       {
         if (__started_ && !__coro_.done())  COASYNC_ATTRIBUTE((unlikely))
-            __promise_->_M_value.destruct();
+          __promise_->_M_value.destruct();
         __coro_.destroy();
       }
   }

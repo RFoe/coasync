@@ -119,6 +119,12 @@ struct awaitable_traits<awaitable<Ref, Alloc>>: std::true_type
   typedef Ref 	value_type;
   typedef Alloc allocator_type;
 };
+template <typename T>
+struct is_awaitable
+	: std::bool_constant<awaitable_traits<T>::value> {};
+template <typename T>
+inline constexpr bool is_awaitable_v
+	= is_awaitable<T>::value;
 }
 namespace COASYNC_ATTRIBUTE((gnu::visibility("default"))) std
 {

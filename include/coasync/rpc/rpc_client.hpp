@@ -6,6 +6,7 @@
 #endif // defined(_MSC_VER) && (_MSC_VER >= 1200)
 
 #include "../net/serde_stream.hpp"
+#include "../detail/object_deduce.hpp"
 
 namespace COASYNC_ATTRIBUTE((gnu::visibility("default"))) coasync
 {
@@ -26,22 +27,32 @@ public:
   constexpr basic_rpc_client(basic_rpc_client const&) = delete;
   COASYNC_ATTRIBUTE((always_inline)) basic_rpc_client(basic_rpc_client&&) noexcept = default;
   COASYNC_ATTRIBUTE((always_inline)) basic_rpc_client& operator=(basic_rpc_client&&) noexcept = default;
-  COASYNC_ATTRIBUTE((always_inline)) ~ basic_rpc_client() noexcept {
-	};
+  COASYNC_ATTRIBUTE((always_inline)) ~ basic_rpc_client() noexcept
+  {
+  };
 
   template <typename R, typename... Args>
   COASYNC_ATTRIBUTE((nodiscard))
-  awaitable<R> call(std::string const& __fn, Args&& ... __args)
+  awaitable<R> call(std::string const& __fnname, Args&& ... __args)
   {
-    co_await _M_stream.serialize(__fn);
-    std::tuple<Args...> args { std::forward<Args>(__args)... };
-    co_await _M_stream.serialize(args);
+    static_assert(
+      std::is_void_v<R> or
+      (std::is_object_v<R> and not std::is_pointer_v<R>));
+
+    co_await _M_stream.serialize(__fnname);
+    std::tuple<Args...> arguments { std::forward<Args>(__args)... };
+    co_await _M_stream.serialize(arguments);
+
     COASYNC_ATTRIBUTE((gnu::uninitialized)) union _Storage
     {
-      R _M_value;
+      detail::object_deduce_t<R> _M_value;
     } __storage;
-    co_await _M_stream.deserialize((R&)__storage._M_value);
-    co_return std::move(__storage._M_value);
+    co_await _M_stream.deserialize(static_cast<detail::object_deduce_t<R>&>(__storage._M_value));
+
+		if constexpr(std::is_void_v<R>)
+			co_return;
+		else
+			co_return std::move(__storage._M_value);
   }
 private:
   serde_stream _M_stream;

@@ -5,12 +5,15 @@
 # pragma once
 #endif // defined(_MSC_VER) && (_MSC_VER >= 1200)
 
+#include "rpc_control_variable.hpp"
 #include "../async_fn.hpp"
 #include "../co_spawn.hpp"
 #include "../detail/get_context.hpp"
+#include "../detail/object_deduce.hpp"
 #include "../net/serde_stream.hpp"
 #include "../net/protocol.hpp"
 #include "../net/endpoint.hpp"
+
 #include <unordered_map>
 
 namespace COASYNC_ATTRIBUTE((gnu::visibility("default"))) coasync
@@ -33,12 +36,15 @@ template <typename execution_context> struct COASYNC_ATTRIBUTE((nodiscard)) basi
 /// rpcserver/client comes with the implementations of popular transport, protocol[tcp]
 /// and interface.
 private:
-  typedef std::unordered_map<std::string, async_fn<awaitable<void>(serde_stream&)>> service_table;
+  typedef std::unordered_map<std::string,
+          async_fn<awaitable<void>(serde_stream&)>>
+          service_table;
   typedef basic_serde_stream<execution_context> 				serde_stream;
   template <typename Callback>
   struct COASYNC_ATTRIBUTE((nodiscard)) service_invocable
   {
     template <typename OtherCallback>
+    requires (not std::is_same_v<std::remove_cvref_t<Callback>, service_invocable>)
     COASYNC_ATTRIBUTE((always_inline))
     constexpr explicit service_invocable(OtherCallback&& cb)
     noexcept(std::is_nothrow_constructible_v<Callback>)
@@ -58,12 +64,22 @@ private:
     try
       {
         co_await __stream.deserialize(arguments);
-        co_await __stream.serialize(std::apply(static_cast<Callback&>(_M_callback), arguments));
+        if constexpr(std::is_void_v<typename detail::function_traits<Callback>::result>)
+          {
+            (void) std::apply(static_cast<Callback&>(_M_callback), arguments);
+            COASYNC_ATTRIBUTE((gnu::uninitialized)) detail::object_deduce_t<void> void_response;
+            co_await __stream.serialize(void_response);
+          }
+        else
+          {
+            co_await __stream.serialize(std::apply(static_cast<Callback&>(_M_callback), arguments));
+          }
       }
     catch(std::system_error& err)
       {
         /// The peer end actively disconnects when sending and receiving packets.
-        if(err.code().value() == static_cast<int>(std::errc::connection_aborted)) COASYNC_ATTRIBUTE((likely))
+        if(err.code() == std::make_error_code(std::errc::connection_aborted)
+            or err.code() == std::make_error_code(std::errc::connection_reset)) COASYNC_ATTRIBUTE((likely))
           co_return;
         std::rethrow_exception(std::make_exception_ptr(std::move(err)));
       }
@@ -93,6 +109,7 @@ private:
       awaitable<void> operator()(serde_stream __stream, service_table* __table) const&& noexcept(false)
       COASYNC_ATTRIBUTE((gnu::nonnull))
   {
+//    COASYNC_ATTRIBUTE((gnu::uninitialized)) bool _S_close;
     while(true)
       {
         COASYNC_ATTRIBUTE((gnu::uninitialized)) std::string __fn;
@@ -114,7 +131,7 @@ private:
             std::rethrow_exception(std::current_exception());
           }
         if(not __table->contains(__fn)) COASYNC_ATTRIBUTE((unlikely))
-          throw std::runtime_error("rpc_server: could not find service");
+          throw std::runtime_error(std::string("rpc_server: could not find service ") + __fn);
         co_await (* __table)[__fn](__stream);
       }
   }
@@ -136,7 +153,10 @@ public:
     while(true)
       {
         auto socket = co_await _M_acceptor.accept();
-        co_spawn(co_await detail::get_context(), acceptance_invocable()(serde_stream(std::move(socket)), std::addressof(_M_services)), use_detach);
+        co_spawn(
+          co_await detail::get_context(),
+          acceptance_invocable()(serde_stream(std::move(socket)), std::addressof(_M_services)),
+          use_detach);
       }
   }
   COASYNC_ATTRIBUTE((always_inline))

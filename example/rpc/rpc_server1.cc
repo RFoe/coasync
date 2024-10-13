@@ -13,8 +13,10 @@ awaitable<void> test() noexcept {
     net::tcp::endpoint(net::address_v4::loopback(), 10086)
   };
   net::rpc::rpc_server server(std::move(acceptor));
+  server.bind("sleep", [](int secs) -> void {
+		std::this_thread::sleep_for(std::chrono::seconds(secs));
+	});
   server.bind("add", [](int a, int b) -> int {
-		std::this_thread::sleep_for(2s);
 		return a + b;
 	});
   co_await server.start();
